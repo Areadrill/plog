@@ -128,21 +128,95 @@ O jogador prateado ganha o jogo ao capturar o navio almirante dourado. O jogador
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Representação do Estado do Jogo}
+O tabuleiro é representado como uma lista de listas. De seguida apresentam-se  exemplos de tabuleiros iniciais, intermédios e finais criados em Prolog.
 
-Descrever a forma de representação do estado do tabuleiro (tipicamente uma lista de listas), com exemplificação em Prolog de posições iniciais do jogo, posições intermédias e finais, acompanhadas de imagens ilustrativas.
+Possível estado inicial:
+
+\begin{verbatim} 
+[[' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
+ [' ',' ',' ','p','p','p','p','p',' ',' ',' '],
+ [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
+ [' ','p',' ',' ','d','d','d',' ',' ','p',' '],
+ [' ','p',' ','d',' ',' ',' ','d',' ','p',' '],
+ [' ','p',' ','d',' ','F',' ','d',' ','p',' '],
+ [' ','p',' ','d',' ',' ',' ','d',' ','p',' '],
+ [' ','p',' ',' ','d','d','d',' ',' ','p',' '],
+ [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
+ [' ',' ','p','p','p','p','p','p',' ',' ',' '],
+ [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '] ] 
+\end{verbatim}
+
+Possível estado intermédio:
+\begin{verbatim}
+[[' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
+ [' ',' ',' ','p','p',' ','d','p',' ',' ',' '],
+ [' ',' ',' ','d',' ',' ',' ',' ',' ',' ',' '],
+ [' ',' ',' ','p','d',' ','d','p',' ',' ',' '],
+ [' ','p',' ',' ',' ','p',' ','d',' ','p',' '],
+ [' ','p',' ','d',' ','F',' ','d',' ','p',' '],
+ [' ','p',' ','d',' ',' ',' ','d',' ','p',' '],
+ [' ','p',' ',' ','d','d','d',' ',' ','p',' '],
+ [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
+ [' ',' ','p','p','p','p','p','p',' ',' ',' '],
+ [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '] ]
+\end{verbatim}
+
+Possível estado final, onde as peças douradas venceram porque o navio almirante atingiu uma das casas exteriores:
+\begin{verbatim}
+[[' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
+ [' ',' ',' ','p','p',' ','d','p',' ',' ',' '],
+ [' ',' ',' ','d',' ',' ',' ',' ',' ',' ',' '],
+ [' ',' ',' ','p','d',' ','d','p',' ',' ',' '],
+ [' ','p',' ',' ',' ','p',' ','d',' ','p',' '],
+ [' ','p',' ','d',' ',' ',' ',' ','d','p',' '],
+ [' ','p',' ','d',' ',' ',' ','d',' ','p',' '],
+ [' ','p',' ','p','d',' ','d',' ',' ','p',' '],
+ [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
+ [' ',' ','p','','d',' ','p','p',' ',' ',' '],
+ [' ',' ',' ',' ',' ','F',' ',' ',' ',' ',' '] ] 
+\end{verbatim}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Visualização do Tabuleiro}
 
-Descrever a forma de visualização do tabuleiro em modo de texto e o(s) predicado(s) Prolog construídos para o efeito.
-Deve ser incluída pelo menos uma imagem correspondente ao output produzido pelo predicado de visualização.
+Foram desenvolvidos alguns predicados em Prolog para permitir a visualização do tabuleiro usando caracteres \textit{ASCII}, como exemplificado pela figura \ref{fig:example}.
+\begin{figure}
+\centering
+\includegraphics[scale=1]{Breakthru_initial_sicstus.png}
+\caption{Tabuleiro inicial de um jogo de Breakthru}
+\label{fig:example}
+\end{figure}
 
+\subsection{Predicados de Visualização}
+Foram implementados os predicados de visualização que se seguem:
+
+\begin{verbatim}
+printBoard([]):-write('----------------------------------------------').
+printBoard([H|T]):-
+  write('---------------------------------------------'),nl,
+  printLine(H, '|'), nl,
+  printBoard(T).
+
+printLine([], Sep):-
+  write(Sep).
+printLine([H|T], Sep):-
+  write(Sep),write(' '), write(H), write(' '),
+  printLine(T, Sep).
+\end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Movimentos}
+São possíveis movimentos simples ou capturas, para os quais se desenvolverão os predicados cujos cabeçalhos se elencam na secção \ref{sec:predicates}, que devem suceder somente se o movimento for legal ou for possível efetuar a captura, respetivamente.
 
-Elencar os movimentos (tipos de jogadas) possíveis e definir os cabeçalhos dos predicados que serão utilizados (ainda não precisam de estar implementados).
+\subsection{Cabeçalhos dos Predicados} \label{sec:predicates}
+\begin{verbatim}
+movePiece(RowOrigin, ColumnOrigin, RowDestiny, ColumnDestiny,
+ Player, Board, NewBoard):-
+
+capturePiece(RowOrigin, ColumnOrigin, RowDestiny, ColumnDestiny,
+ Player, Board, NewBoard):-
+\end{verbatim}
 
 
 \end{document}
