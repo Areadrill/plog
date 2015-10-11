@@ -1,0 +1,4 @@
+*.aux
+doc/template.log
+*.gz
+*.log
