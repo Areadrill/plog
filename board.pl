@@ -36,6 +36,11 @@ exampleEnd([ [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
                 [' ',' ',' ',' ',' ','F',' ',' ',' ',' ',' '] ]).
 
 
+symbol(emptyCell, ' ').
+symbol(flagship, 'F').
+symbol(silverPiece, 'p').
+symbol(goldenPiece, 'd').
+				
 createBoard(_, 0, []).
 createBoard(N, M, [H|T]):-
   M > 0,
@@ -49,16 +54,21 @@ createLine(N, [emptyCell|T]):-
   N1 is N-1,
   createLine(N1, T).
 
-printBoard([]):-write('----------------------------------------------').
-printBoard([H|T]):-
-  write('---------------------------------------------'),nl,
-  printLine(H, '|'), nl,
-  printBoard(T).
+printBoard([], 0):-write(' ----------------------------------------------'),nl,
+	write('   0   1   2   3   4   5   6   7   8   9  10').
+	
+printBoard([H|T], N):-
+  N1 is N-1,
+  Print is 10-N1,
+  write(' ---------------------------------------------'),nl,
+  write(Print), printLine(H, '|'), nl,
+  printBoard(T, N1).
 
 printLine([], Sep):-
   write(Sep).
 printLine([H|T], Sep):-
-  write(Sep),write(' '), write(H), write(' '),
+  symbol(H, Symb),
+  write(Sep),write(' '), write(Symb), write(' '),
   printLine(T, Sep).
 
 
