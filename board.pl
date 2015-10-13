@@ -1,5 +1,4 @@
 
-%create predicates based on ferrolhos implementation
 exampleInitial([ [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
                  [' ',' ',' ','p','p','p','p','p',' ',' ',' '],
                  [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
@@ -45,7 +44,7 @@ createBoard(N, M, [H|T]):-
   createBoard(N, M1, T).
 
 createLine(0, []).
-createLine(N, [H|T]):-
+createLine(N, [emptyCell|T]):-
   N > 0,
   N1 is N-1,
   createLine(N1, T).
@@ -63,16 +62,23 @@ printLine([H|T], Sep):-
   printLine(T, Sep).
 
 
-replaceInLine(0, Char, [Char|T]).
-replaceInLine(Y, Char, [H|T]):-
+replaceInLine(0, Char, [H|T], [Char|T]).
+replaceInLine(Y, Char, [H|T], [H|R]):-
   Y > 0,
   Y1 is Y-1,
-  replaceInLine(Y1, Char, T).
+  replaceInLine(Y1, Char, T, R).
 
-replaceInBoard(Y, 0, Char, [H|T]):-
-  replaceInLine(Y, Char, H).
+replaceInBoard(Y, 0, Char, [H|T], [L|T]):-
+  replaceInLine(Y, Char, H, L).
 
-replaceInBoard(Y, X, Char, [H|T]):-
+replaceInBoard(Y, X, Char, [H|T], [H|R]):-
   X > 0,
   X1 is X-1,
-  replaceInBoard(Y, X1, Char, T).
+  replaceInBoard(Y, X1, Char, T, R).
+
+  
+test:-
+	createBoard(8, 8, L),
+	printBoard(L), nl, nl,
+	replaceInBoard(4, 4, 'x', L, Nl),
+	printBoard(Nl).
