@@ -16,8 +16,7 @@ player(goldenPlayer).
 player(silverPlayer).
 
 
-goldenPieces(0).
-silverPieces(0).
+
 flagships(1).
 
 owner(goldenPlayer, goldenPiece).
@@ -29,9 +28,16 @@ state(begin).
 state(game).
 state(over).
 
-startGame:- createBoard(11,11,Board),
-			setupBoard(Board),
+teste(X):- createBoard(3,3,Board),
+		replaceInBoard(2,2, boda, Board, NewBoard),
+		getCell(NewBoard, 2, 2, boda).
+
+startGame:- assert(goldenPieces(0)), assert(silverPieces(0)),
+			createBoard(11,11,Board),
+			replaceInBoard(5, 5, flagship, Board, NewBoard),
+			setupBoard(NewBoard),
 			currentState(boda).
+			
 			
 setupBoard(Board):- assert(gameState(Board, goldenPlayer)),
 					repeat,
@@ -47,19 +53,40 @@ boardFull:- goldenPieces(N), flagships(F), silverPieces(J),
 			J == 20, N == 12, F == 1.
 
 placePiece(CurrentBoard, goldenPlayer, NewBoard, goldenPlayer):-
- retract(goldenPieces(G)), G =< 11,
+goldenPieces(J), J < 3,
+ retract(goldenPieces(G)),
  write('New Piece Coordinates: '),
  repeat,
  readCoordinates(X, Y),
- validateCoordinates(CureentBoard, X, Y, goldenPlayer),
- replaceInBoard(Y, X, goldenPiece, CurrentBoard, NewBoard),
+ validateCoordinates(CurrentBoard, X, Y, goldenPlayer),
+ replaceInBoard(X, Y, goldenPiece, CurrentBoard, NewBoard),
  G1 is G+1,
  assert(goldenPieces(G1)),
  !.
  
- placePiece(CurrentBoard, goldenPlayer, NewBoard, silverPlayer).
+ placePiece(CurrentBoard, goldenPlayer, NewBoard, silverPlayer):-
+ retract(goldenPieces(G)),
+ write('New Piece Coordinates: '),
+ repeat,
+ readCoordinates(X, Y),
+ validateCoordinates(CurrentBoard, X, Y, goldenPlayer),
+ replaceInBoard(X, Y, goldenPiece, CurrentBoard, NewBoard),
+ G1 is G+1,
+ assert(goldenPieces(G1)),
+ !.
  
- placePiece(CurrentBoard, silverPlayer, NewBoard, silverPlayer).
+ 
+ placePiece(CurrentBoard, silverPlayer, NewBoard, silverPlayer):-
+ silverPieces(J), J =< 20,
+  retract(silverPieces(G)),
+ write('New Piece Coordinates: '),
+ repeat,
+ readCoordinates(X, Y),
+ validateCoordinates(CurrentBoard, X, Y,  silverPlayer),
+ replaceInBoard(X, Y, silverPiece, CurrentBoard, NewBoard),
+ G1 is G+1,
+ assert(silverPieces(G1)),
+ !.
  
  
  
@@ -68,5 +95,5 @@ validateCoordinates(Board, X, Y, goldenPlayer):-
 	Y > 2, Y < 8, 
 	getCell(Board, X, Y, emptyCell), !.
  
-validateCoordinates(X, Y, silverPlayer):-
+validateCoordinates(Board, X, Y, silverPlayer):-
 	\+(validateCoordinates(X, Y, goldenPlayer)).
