@@ -35,11 +35,16 @@ teste(X):- createBoard(3,3,Board),
 startGame:- assert(goldenPieces(0)), assert(silverPieces(0)),
 			createBoard(11,11,Board),
 			replaceInBoard(5, 5, flagship, Board, NewBoard),
-			setupBoard(NewBoard),
-			currentState(boda).
+			setupBoard(NewBoard, NewerBoard), 
+			playGame(NewerBoard).
+
+playGame(Board):- 
+	readPlayer(Player),
+	takeTurn(Player, Board, NewBoard).
 			
 			
-setupBoard(Board):- assert(gameState(Board, goldenPlayer)),
+			
+setupBoard(Board, NewBoard):- assert(gameState(Board, goldenPlayer)),
 					repeat,
 					retract(gameState(CurrentBoard, CurrentPlayer)),
 					write(CurrentPlayer),
@@ -97,3 +102,8 @@ validateCoordinates(Board, X, Y, goldenPlayer):-
  
 validateCoordinates(Board, X, Y, silverPlayer):-
 	\+(validateCoordinates(X, Y, goldenPlayer)).
+	
+	
+takeTurn(Player):-
+	write("Choose the piece you want to move: "), nl,
+	getCoordinates(X, Y, Board),
