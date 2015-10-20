@@ -87,8 +87,14 @@ replaceInBoard(Y, X, Char, [H|T], [H|R]):-
   replaceInBoard(Y, X1, Char, T, R).
 
   
-test:-
-	createBoard(8, 8, L),
-	printBoard(L), nl, nl,
-	replaceInBoard(4, 4, 'x', L, Nl),
-	printBoard(Nl).
+getCell([H|T], X, 0, E):-
+	getCellL(H, X, E).
+getCell([H|T], X, Y, E):-
+	Y1 is Y-1,
+	getCell(T, X, Y1, E).
+	
+getCellL([H|_], 0, H).
+getCellL([H|T], X, E):-
+	X1 is X-1,
+	getCellL(T, X1, E).
+	
