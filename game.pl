@@ -35,15 +35,15 @@ teste(X):- createBoard(3,3,Board),
 startGame:- assert(goldenPieces(0)), assert(silverPieces(0)),
 			createBoard(11,11,Board),
 			replaceInBoard(5, 5, flagship, Board, NewBoard),
-			setupBoard(NewBoard, NewerBoard), 
+			setupBoard(NewBoard, NewerBoard),
 			playGame(NewerBoard).
 
-playGame(Board):- 
+playGame(Board):-
 	readPlayer(Player),
 	takeTurn(Player, Board, NewBoard).
-			
-			
-			
+
+
+
 setupBoard(Board, NewBoard):- assert(gameState(Board, goldenPlayer)),
 					repeat,
 					retract(gameState(CurrentBoard, CurrentPlayer)),
@@ -52,8 +52,8 @@ setupBoard(Board, NewBoard):- assert(gameState(Board, goldenPlayer)),
 					printBoard(NewBoard, 11),
 					assert(gameState(NewBoard, NewPlayer)),
 					boardFull.
-	
-			
+
+
 boardFull:- goldenPieces(N), flagships(F), silverPieces(J),
 			J == 20, N == 12, F == 1.
 
@@ -68,7 +68,7 @@ goldenPieces(J), J < 3,
  G1 is G+1,
  assert(goldenPieces(G1)),
  !.
- 
+
  placePiece(CurrentBoard, goldenPlayer, NewBoard, silverPlayer):-
  retract(goldenPieces(G)),
  write('New Piece Coordinates: '),
@@ -79,10 +79,11 @@ goldenPieces(J), J < 3,
  G1 is G+1,
  assert(goldenPieces(G1)),
  !.
- 
- 
+
+
  placePiece(CurrentBoard, silverPlayer, NewBoard, silverPlayer):-
- silverPieces(J), J =< 20,
+ silverPieces(J), J =< 3 %aqui e 20
+ ,
   retract(silverPieces(G)),
  write('New Piece Coordinates: '),
  repeat,
@@ -92,18 +93,26 @@ goldenPieces(J), J < 3,
  G1 is G+1,
  assert(silverPieces(G1)),
  !.
- 
- 
- 
+
+
+
 validateCoordinates(Board, X, Y, goldenPlayer):-
 	X > 2, X < 8,
-	Y > 2, Y < 8, 
+	Y > 2, Y < 8,
 	getCell(Board, X, Y, emptyCell), !.
- 
+
 validateCoordinates(Board, X, Y, silverPlayer):-
-	\+(validateCoordinates(X, Y, goldenPlayer)).
-	
-	
-takeTurn(Player):-
+	\+(validateCoordinates(Board, X, Y, goldenPlayer)),
+	getCell(Board, X, Y, emptyCell), !.
+
+
+takeTurn(Player, Board, NewBoard):-
 	write("Choose the piece you want to move: "), nl,
-	getCoordinates(X, Y, Board),
+	getCoordinates(Board, Player).
+
+
+
+getCoordinates(Board, Player):-
+	readCoordinates(X, Y),
+	getCell(Board, X, Y, Piece),
+	owner(Player, Piece).
