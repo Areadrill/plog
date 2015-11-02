@@ -40,7 +40,9 @@ startGame:- assert(goldenPieces(0)), assert(silverPieces(0)),
 
 playGame(Board):-
 	readPlayer(Player),
-	takeTurn(Player, Board, NewBoard).
+	repeat,
+	takeTurn(Player, Board, NewBoard),
+	fail. %mudar para winning condition
 
 
 
@@ -55,7 +57,9 @@ setupBoard(Board, NewBoard):- assert(gameState(Board, goldenPlayer)),
 
 
 boardFull:- goldenPieces(N), flagships(F), silverPieces(J),
-			J == 20, N == 12, F == 1.
+			J == 4, %devia ser 20
+			N == 4, %devia ser 11
+			F == 1. %taboum
 
 placePiece(CurrentBoard, goldenPlayer, NewBoard, goldenPlayer):-
 goldenPieces(J), J < 3,
@@ -107,12 +111,24 @@ validateCoordinates(Board, X, Y, silverPlayer):-
 
 
 takeTurn(Player, Board, NewBoard):-
-	write("Choose the piece you want to move: "), nl,
-	getCoordinates(Board, Player).
+	write('Turn for '), write(Player), nl,
+	write('Choose the piece you want to move: '), nl,
+	readCoordinates(XI, YI),
+	write('Where do you want to move it to: '), nl,
+	readCoordinates(XF, YF),
+	evaluateMove(XI, YI, XF, YF, Board, Player).
 
+evaluateMove(Xi, Yi, Xf, Yf, Board, Player):- %num testei
+	getCell(Board, Xi, Yi, Piece),
+	owner(Player, Piece),
+	calculateDistances(Xi, Yi, Xf, Yf, DX, DY),
+	(DX \= 0, DY is 0;
+	DX is 0, DY \= 0;
+	DX is 1, DY is 1;
+	DX is 1, DY is -1;
+	DX is -1, DY is 1;
+	DX is -1, DY is -1). %to be continued
 
-
-getCoordinates(Board, Player):-
-	readCoordinates(X, Y),
-	getCell(Board, X, Y, Piece),
-	owner(Player, Piece).
+calculateDistances(Xi, Yi, Xf, Yf, DX, DY):- %num testei
+	DX is Xf - Xi,
+	DY is Yf - Yi.
