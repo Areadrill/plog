@@ -42,6 +42,7 @@ playGame(Board):-
 	readPlayer(Player),
 	repeat,
 	takeTurn(Player, Board, NewBoard),
+	printBoard(NewBoard, 11),
 	fail. %mudar para winning condition
 
 
@@ -116,19 +117,23 @@ takeTurn(Player, Board, NewBoard):-
 	readCoordinates(XI, YI),
 	write('Where do you want to move it to: '), nl,
 	readCoordinates(XF, YF),
-	evaluateMove(XI, YI, XF, YF, Board, Player).
+	evaluateMove(XI, YI, XF, YF, Board, NewBoard, Player).
 
-evaluateMove(Xi, Yi, Xf, Yf, Board, Player):- %num testei
+
+evaluateMove(Xi, Yi, Xf, Yf, Board, NewererBoard, Player):- %num testei
 	getCell(Board, Xi, Yi, Piece),
 	owner(Player, Piece),
 	calculateDistances(Xi, Yi, Xf, Yf, DX, DY),
+	write(DX), nl, write(DY), nl,
 	(DX \= 0, DY is 0;
 	DX is 0, DY \= 0;
 	DX is 1, DY is 1;
 	DX is 1, DY is -1;
 	DX is -1, DY is 1;
-	DX is -1, DY is -1). %to be continued
+	DX is -1, DY is -1),
+	replaceInBoard(Xi, Yi, emptyCell, Board, NewBoard),
+	replaceInBoard(Xf, Yf, Piece, NewBoard, NewererBoard).
 
-calculateDistances(Xi, Yi, Xf, Yf, DX, DY):- %num testei
+calculateDistances(Xi, Yi, Xf, Yf, DX, DY):-
 	DX is Xf - Xi,
 	DY is Yf - Yi.
