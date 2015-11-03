@@ -40,9 +40,12 @@ startGame:- assert(goldenPieces(0)), assert(silverPieces(0)),
 
 playGame(Board):-
 	readPlayer(Player),
+	assert(gameState(Board, Player)),
 	repeat,
-	takeTurn(Player, Board, NewBoard),
+	retract(gameState(CurrentBoard, CurrentPlayer)),
+	takeTurn(Player, CurrentBoard, NewBoard, NewPlayer),
 	printBoard(NewBoard, 11),
+	assert(gameState(NewBoard, Player)),
 	fail. %mudar para winning condition
 
 
@@ -111,7 +114,7 @@ validateCoordinates(Board, X, Y, silverPlayer):-
 	getCell(Board, X, Y, emptyCell), !.
 
 
-takeTurn(Player, Board, NewBoard):-
+takeTurn(Player, Board, NewBoard, NewPlayer):-
 	write('Turn for '), write(Player), nl,
 	write('Choose the piece you want to move: '), nl,
 	readCoordinates(XI, YI),
@@ -120,11 +123,10 @@ takeTurn(Player, Board, NewBoard):-
 	evaluateMove(XI, YI, XF, YF, Board, NewBoard, Player).
 
 
-evaluateMove(Xi, Yi, Xf, Yf, Board, NewererBoard, Player):- %num testei
+evaluateMove(Xi, Yi, Xf, Yf, Board, NewererBoard, Player):-
 	getCell(Board, Xi, Yi, Piece),
 	owner(Player, Piece),
 	calculateDistances(Xi, Yi, Xf, Yf, DX, DY),
-	write(DX), nl, write(DY), nl,
 	(DX \= 0, DY is 0;
 	DX is 0, DY \= 0;
 	DX is 1, DY is 1;
