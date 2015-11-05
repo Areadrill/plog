@@ -7,6 +7,7 @@
 :- dynamic(silverPieces/1).
 :- dynamic(goldenPieces/1).
 :- dynamic(gameState/2).
+:- dynamic(position/3).
 
 piece(goldenPiece).
 piece(silverPiece).
@@ -28,7 +29,7 @@ state(begin).
 state(game).
 state(over).
 
-teste(X):- createBoard(3,3,Board),
+teste(_):- createBoard(3,3,Board),
 		replaceInBoard(2,2, boda, Board, NewBoard),
 		getCell(NewBoard, 2, 2, boda).
 
@@ -51,6 +52,7 @@ playGame(Board):-
 
 
 setupBoard(Board, NewBoard):- assert(gameState(Board, goldenPlayer)),
+					fillBoard(11,11),
 					repeat,
 					retract(gameState(CurrentBoard, CurrentPlayer)),
 					write(CurrentPlayer),
@@ -73,6 +75,7 @@ goldenPieces(J), J < 3,
  readCoordinates(X, Y),
  validateCoordinates(CurrentBoard, X, Y, goldenPlayer),
  replaceInBoard(X, Y, goldenPiece, CurrentBoard, NewBoard),
+ asserta( (position(X,Y, goldenPiece)) ),
  G1 is G+1,
  assert(goldenPieces(G1)),
  !.
@@ -84,20 +87,21 @@ goldenPieces(J), J < 3,
  readCoordinates(X, Y),
  validateCoordinates(CurrentBoard, X, Y, goldenPlayer),
  replaceInBoard(X, Y, goldenPiece, CurrentBoard, NewBoard),
+ asserta( (position(X,Y,goldenPiece)) ),
  G1 is G+1,
  assert(goldenPieces(G1)),
  !.
 
 
  placePiece(CurrentBoard, silverPlayer, NewBoard, silverPlayer):-
- silverPieces(J), J =< 3 %aqui e 20
- ,
+ silverPieces(J), J =< 3, %aqui e 20
   retract(silverPieces(G)),
  write('New Piece Coordinates: '),
  repeat,
  readCoordinates(X, Y),
  validateCoordinates(CurrentBoard, X, Y,  silverPlayer),
  replaceInBoard(X, Y, silverPiece, CurrentBoard, NewBoard),
+ asserta( (position(X,Y, silverPiece)) ),
  G1 is G+1,
  assert(silverPieces(G1)),
  !.
@@ -123,6 +127,7 @@ takeTurn(Player, Board, NewBoard, NewPlayer):-
 	evaluateMove(XI, YI, XF, YF, Board, NewBoard, Player).
 
 
+
 evaluateMove(Xi, Yi, Xf, Yf, Board, NewererBoard, Player):-
 	getCell(Board, Xi, Yi, Piece),
 	owner(Player, Piece),
@@ -139,3 +144,22 @@ evaluateMove(Xi, Yi, Xf, Yf, Board, NewererBoard, Player):-
 calculateDistances(Xi, Yi, Xf, Yf, DX, DY):-
 	DX is Xf - Xi,
 	DY is Yf - Yi.
+
+	emptySpace(X,Y,X,Y):- fail.
+	emptySpace(X,Y,Xf,Y):- X>Xf, X1 is X-1, emptyCellsBetween(X1,Y,Xf,Y).
+	emptySpace(X,Y,Xf,Y):- X < Xf, X1 is X+1, emptyCellsBetween(X1, Y, Xf, Y).
+	emptySpace(X,Y,X,Yf):- Y> Yf, Y1 is Y-1, emptyCellsBetween(X,Y1,X, Yf).
+	emptySpace(X,Y,X,Yf):- Y < Yf, Y1 is Y+1, emptyCellsBetween(X,Y1,X,Yf).
+
+	emptyCellsBetween(X,Y,X,Y):- findall(Z, position(X,Y,Z), [emptyCell]).
+	emptyCellsBetween(X,Y,X,Yf):-Y>Yf,Y1 is Y-1, findall(Z, position(X,Y,Z), [emptyCell]), emptyCellsBetween(X,Y1,X,Yf).
+	emptyCellsBetween(X,Y,X,Yf):-Yf1 is Yf-1, findall(Z, position(X,Yf,Z), [emptyCell]), emptyCellsBetween(X,Y,X,Yf1).
+	emptyCellsBetween(X,Y,Xf,Y):-X>Xf,X1 is X-1, findall(Z, position(X,Y,Z), [emptyCell]), emptyCellsBetween(X1,Y,Xf,Y).
+	emptyCellsBetween(X,Y,Xf,Y):-Xf1 is Xf-1, findall(Z, position(Xf,Y,Z), [emptyCell]), emptyCellsBetween(X,Y,Xf1,Y).
+
+	validMove(X,Y,Xf,Yf, Player):-
+		owner(Player, Piece),
+		position(X,Y,Piece),
+		position(Xf,Yf, emptyCell),
+		findall(Z, position(Xf,Yf,Z), [emptyCell]),
+		emptySpace(X,Y,Xf,Yf).

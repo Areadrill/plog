@@ -40,7 +40,17 @@ symbol(emptyCell, ' ').
 symbol(flagship, 'F').
 symbol(silverPiece, 'p').
 symbol(goldenPiece, 'd').
-				
+
+getBoardElement([H|_], Piece, X, Y):- getElement(H, Piece).
+getBoardElement([_|T], Piece):- getBoardElement(T, Piece).
+getBoardElement([], _):- fail.
+
+getElement([H|_], H).
+getElement([_|T], Piece):- getElement(T, Piece).
+getElement([], _):- fail.
+
+
+
 createBoard(_, 0, []).
 createBoard(N, M, [H|T]):-
   M > 0,
@@ -56,7 +66,7 @@ createLine(N, [emptyCell|T]):-
 
 printBoard([], 0):-write(' ----------------------------------------------'),nl,
 	write('   0   1   2   3   4   5   6   7   8   9  10'), nl.
-	
+
 printBoard([H|T], N):-
   N1 is N-1,
   Print is 10-N1,
@@ -72,7 +82,7 @@ printLine([H|T], Sep):-
   printLine(T, Sep).
 
 
-replaceInLine(0, Char, [H|T], [Char|T]).
+replaceInLine(0, Char, [_|T], [Char|T]).
 replaceInLine(Y, Char, [H|T], [H|R]):-
   Y > 0,
   Y1 is Y-1,
@@ -86,15 +96,20 @@ replaceInBoard(Y, X, Char, [H|T], [H|R]):-
   X1 is X-1,
   replaceInBoard(Y, X1, Char, T, R).
 
-  
-getCell([H|T], X, 0, E):-
+
+getCell([H|_], X, 0, E):-
 	getCellL(H, X, E).
-getCell([H|T], X, Y, E):-
+getCell([_|T], X, Y, E):-
 	Y1 is Y-1,
 	getCell(T, X, Y1, E).
-	
+
 getCellL([H|_], 0, H).
-getCellL([H|T], X, E):-
+getCellL([_|T], X, E):-
 	X1 is X-1,
 	getCellL(T, X1, E).
-	
+
+fillBoardLine(11,Y).
+fillBoardLine(X,Y):-assertz(position(X,Y, emptyCell)), X1 is X+1, fillBoardLine(X1,Y).
+
+fillBoard(X,11).
+fillBoard(X,Y):-fillBoardLine(X,Y), Y1 is Y+1, fillBoard(X,Y1).
