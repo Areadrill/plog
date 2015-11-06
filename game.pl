@@ -8,7 +8,8 @@
 :- dynamic(goldenPieces/1).
 :- dynamic(gameState/2).
 :- dynamic(position/3).
-
+:- dynamic(player/1).
+:- dynamic(currentPlayer/1).
 piece(goldenPiece).
 piece(silverPiece).
 piece(flagship).
@@ -16,35 +17,47 @@ piece(flagship).
 player(goldenPlayer).
 player(silverPlayer).
 
-currentPlayer(goldenPlayer).
-
 flagships(1).
 
 owner(goldenPlayer, goldenPiece).
 owner(silverPlayer, silverPiece).
 owner(goldenPlayer, flagship).
-
+opponent(silverPlayer, goldenPlayer).
+opponent(goldenPlayer, silverPlayer).
 
 state(begin).
 state(game).
 state(over).
 
-
 startGame:- retractall(position(_,_,_)), assert(goldenPieces(0)), assert(silverPieces(0)),
 	setupBoard,
 	playGame.
 
+teste:-fillBoard(0,0), asserta(position(1,1,goldenPiece)), asserta(position(0,0,silverPiece)), asserta(position(0,1,silverPiece)), asserta(position(0,2,silverPiece)), asserta(position(0,3,silverPiece)), asserta(position(4,4,goldenPiece)),
+asserta(position(4,5,goldenPiece)), asserta(position(4,6,goldenPiece)), asserta(position(4,3,goldenPiece)).
+
 playGame:-
 	readPlayer(Player),
-	assert(player(Player)),
+	assert(currentPlayer(Player)),
 	repeat,
-	retract(player(NPlayer)),
-	takeTurn(NPlayer, CurrentBoard, NewBoard, NewPlayer),
-	printBoard(0, 0),
-	assert(player(NewPlayer)),
+	retract(currentPlayer(CurrentPlayer)),
+	write(Player),
+	takeTurn(CurrentPlayer, NewPlayer),
+	assert(currentPlayer(NewPlayer)),
+	printBoard,
 	fail.
 
+takeTurn(goldenPlayer,silverPlayer):- doPlayerMovement(goldenPlayer), doPlayerMovement(goldenPlayer).
+takeTurn(silverPlayer, goldenPlayer):-doPlayerMovement(silverPlayer), doPlayerMovement(silverPlayer).
 
+doPlayerMovement(Player):-write(Player), write(' chooses a piece to move:'), nl,
+repeat,
+readCoordinates(Xi,Yi),owner(Player,Piece),position(Xi,Yi,Piece), !,
+nl,write('destination:'),nl,
+repeat,
+readCoordinates(Xf,Yf),
+validPlay(Xi,Yi,Xf,Yf,Player),!,
+doPlay(Xi,Yi,Xf,Yf,Player).
 
 setupBoard:-
 	fillBoard,
@@ -58,7 +71,7 @@ placePiece(goldenPlayer, N):- N1 is N+1, N < 4,
 	readCoordinates(X,Y),
 	validateCoordinates(X,Y, goldenPlayer),!,
 	asserta(position(X,Y,goldenPiece)),
-		printBoard,
+		printBoard,!,
 	placePiece(goldenPlayer, N1).
 
 placePiece(silverPlayer, 4).
@@ -68,14 +81,13 @@ placePiece(silverPlayer, N):- N1 is N+1, N< 4,
 	readCoordinates(X,Y),
 	validateCoordinates(X,Y, silverPlayer),!,
 	asserta(position(X,Y,silverPiece)),
-	placePiece(silverPiece, N1).
-
+	printBoard,!,
+	placePiece(silverPlayer, N1).
 
 boardFull:- goldenPieces(N), flagships(F), silverPieces(J),
 	J == 4, %devia ser 20
 	N == 4, %devia ser 11
 	F == 1. %taboum
-
 
 validateCoordinates( X, Y, goldenPlayer):-
 	X > 2, X < 8,
@@ -85,9 +97,6 @@ validateCoordinates( X, Y, goldenPlayer):-
 validateCoordinates(X, Y, silverPlayer):-
 	\+(validateCoordinates( X, Y, goldenPlayer)),
 	findall(Z, position(X,Y,Z), [emptyCell]).
-
-
-
 
 calculateDistances(Xi, Yi, Xf, Yf, DX, DY):-
 	DX is Xf - Xi,
@@ -105,7 +114,22 @@ calculateDistances(Xi, Yi, Xf, Yf, DX, DY):-
 	emptyCellsBetween(X,Y,Xf,Y):-X>Xf,X1 is X-1, findall(Z, position(X,Y,Z), [emptyCell]), emptyCellsBetween(X1,Y,Xf,Y).
 	emptyCellsBetween(X,Y,Xf,Y):-Xf1 is Xf-1, findall(Z, position(Xf,Y,Z), [emptyCell]), emptyCellsBetween(X,Y,Xf1,Y).
 
-	validMove(X,Y,Xf,Yf, Player):-
+doPlay(X,Y,Xf,Yf,Player):- validMove(X,Y,Xf,Yf,Player),
+	owner(Player,Piece),retract(position(X,Y,Piece)),asserta(position(X,Y,Piece)).
+
+doPlay(X,Y,Xf,Yf,Player):- validCapture(X,Y,Xf,Yf,Player),
+	owner(Player,Piece), retract(position(X,Y,Piece)),owner(Player,OpponentPiece), retract(position(Xf,Yf,OpponentPiece)), asserta(position(Xf,Yf,Piece)).
+
+validPlay(X,Y,Xf,Yf,Player):- (validMove(X,Y,Xf,Yf,Player);validCapture(X,Y,Xf,Yf,Player)).
+
+	validCapture(X,Y,Xf,Yf,Player):-
+	 opponent(Player, Opponent),
+	 owner(Opponent,OpponentPiece),
+	 position(Xf,Yf,OpponentPiece),
+	 (X =:= Xf-1; X =:= Xf+1),
+	 (Y =:= Yf-1; Y =:= Yf+1).
+
+	validMove(X,Y,Xf,Yf, Player):- %movimento normal
 		owner(Player, Piece),
 		position(X,Y,Piece),
 		position(Xf,Yf, emptyCell),

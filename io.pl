@@ -13,4 +13,4 @@ readPlayer(X):-
 	repeat,
 	write('Golden player chooses a player to start the game (silverPlayer. or goldenPlayer.)'), nl,
 	read(X),
-	(X = silverPlayer; X = goldenPlayer).
+	player(X),!.
