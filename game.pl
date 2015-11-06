@@ -118,7 +118,7 @@ doPlay(X,Y,Xf,Yf,Player):- validMove(X,Y,Xf,Yf,Player),
 	owner(Player,Piece),retract(position(X,Y,Piece)),asserta(position(Xf,Yf,Piece)).
 
 doPlay(X,Y,Xf,Yf,Player):- validCapture(X,Y,Xf,Yf,Player),
-	owner(Player,Piece), retract(position(X,Y,Piece)),owner(Player,OpponentPiece), retract(position(Xf,Yf,OpponentPiece)), asserta(position(Xf,Yf,Piece)).
+	owner(Player,Piece), retract(position(X,Y,Piece)),opponent(Player, Opponent), owner(Opponent,OpponentPiece), retract(position(Xf,Yf,OpponentPiece)), asserta(position(Xf,Yf,Piece)).
 
 validPlay(X,Y,Xf,Yf,Player):- (validMove(X,Y,Xf,Yf,Player);validCapture(X,Y,Xf,Yf,Player)).
 
