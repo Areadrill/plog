@@ -41,14 +41,14 @@ playGame:-
 	assert(currentPlayer(Player)),
 	repeat,
 	retract(currentPlayer(CurrentPlayer)),
-	write(Player),
+	%write(Player),
 	takeTurn(CurrentPlayer, NewPlayer),
 	assert(currentPlayer(NewPlayer)),
 	printBoard,
 	fail.
 
-takeTurn(goldenPlayer,silverPlayer):- doPlayerMovement(goldenPlayer), doPlayerMovement(goldenPlayer).
-takeTurn(silverPlayer, goldenPlayer):-doPlayerMovement(silverPlayer), doPlayerMovement(silverPlayer).
+takeTurn(goldenPlayer,silverPlayer):- doPlayerMovement(goldenPlayer), printBoard, doPlayerMovement(goldenPlayer).
+takeTurn(silverPlayer, goldenPlayer):-doPlayerMovement(silverPlayer), printBoard, doPlayerMovement(silverPlayer).
 
 doPlayerMovement(Player):-write(Player), write(' chooses a piece to move:'), nl,
 repeat,
@@ -115,7 +115,7 @@ calculateDistances(Xi, Yi, Xf, Yf, DX, DY):-
 	emptyCellsBetween(X,Y,Xf,Y):-Xf1 is Xf-1, findall(Z, position(Xf,Y,Z), [emptyCell]), emptyCellsBetween(X,Y,Xf1,Y).
 
 doPlay(X,Y,Xf,Yf,Player):- validMove(X,Y,Xf,Yf,Player),
-	owner(Player,Piece),retract(position(X,Y,Piece)),asserta(position(X,Y,Piece)).
+	owner(Player,Piece),retract(position(X,Y,Piece)),asserta(position(Xf,Yf,Piece)).
 
 doPlay(X,Y,Xf,Yf,Player):- validCapture(X,Y,Xf,Yf,Player),
 	owner(Player,Piece), retract(position(X,Y,Piece)),owner(Player,OpponentPiece), retract(position(Xf,Yf,OpponentPiece)), asserta(position(Xf,Yf,Piece)).
