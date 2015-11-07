@@ -64,13 +64,11 @@ wonGame(silverPlayer):- \+position(_,_,flagship).
 
 takeTurn(goldenPlayer, silverPlayer):-
 (playerGolden(human), doPlayerMovement(goldenPlayer), printBoard,( (\+moved(flagship), \+captured, printBoard, doPlayerMovement(goldenPlayer)); (moved(flagship);captured) );
-playerGolden(bot), validPlay(X, Y, Xf, Yf, goldenPlayer), doPlay(X, Y, Xf, Yf, goldenPlayer), printBoard,
-randomPlay(goldenPlayer, Pred1), Pred =.. Pred1, Pred, (\+moved(flagship),\+captured,randomPlay(goldenPlayer, Pred1), Pred =.. Pred1, Pred);(moved(flagship);captured), printBoard), !.
+playerGolden(bot), randomPlay(goldenPlayer, Pred1), Pred =.. Pred1, Pred, printBoard, (\+moved(flagship),\+captured, randomMove(goldenPlayer, Pred2), PredD =.. Pred2, PredD);(moved(flagship);captured), printBoard), !.
 
 takeTurn(silverPlayer, goldenPlayer):-
 (playerSilver(human), doPlayerMovement(silverPlayer), printBoard, ((\+captured,doPlayerMovement(silverPlayer));captured);
-playerSilver(bot), validPlay(X, Y, Xf, Yf, silverPlayer), doPlay(X, Y, Xf, Yf, silverPlayer), printBoard,
-randomPlay(goldenPlayer, Pred1), Pred =.. Pred1, Pred, (captured;(\+captured,randomPlay(silverPlayer, Pred1), Pred =.. Pred1, Pred)), printBoard), !.
+playerSilver(bot), randomPlay(silverPlayer, Pred1), Pred =.. Pred1, Pred, (captured;(\+captured,randomMove(silverPlayer, Pred2), PredD =.. Pred2, PredD)), printBoard), !.
 
 
 doPlayerMovement(Player):-
@@ -161,8 +159,16 @@ position(Xf,Yf, emptyCell),
 findall(Z, position(Xf,Yf,Z), [emptyCell]),
 emptySpace(X,Y,Xf,Yf).
 
-randomPlay(CurrPlayer, Pred):-
+randomMove(CurrPlayer, Pred):-
 findall([Xi,Yi,Xf,Yf], validMove(Xi,Yi,Xf,Yf,CurrPlayer), Possiveis),
+length(Possiveis, N),
+random(0, N, NList),
+nth0(NList, Possiveis, ChosenPlay),
+append(ChosenPlay, [CurrPlayer], AlmostPred),
+append([doPlay], AlmostPred, Pred).
+
+randomPlay(CurrPlayer, Pred):-
+findall([Xi,Yi,Xf,Yf], validPlay(Xi,Yi,Xf,Yf,CurrPlayer), Possiveis),
 length(Possiveis, N),
 random(0, N, NList),
 nth0(NList, Possiveis, ChosenPlay),
