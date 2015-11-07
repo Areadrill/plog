@@ -33,6 +33,10 @@ state(begin).
 state(game).
 state(over).
 
+breakthru:-
+mainMenu.
+
+
 startGame:- retractall(position(_,_,_)), assert(goldenPieces(0)), assert(silverPieces(0)),
 	setupBoard,
 	playGame.
@@ -53,6 +57,16 @@ playGame:-
 
 takeTurn(goldenPlayer,silverPlayer):- doPlayerMovement(goldenPlayer), ( (\+moved(flagship), \+captured, printBoard, doPlayerMovement(goldenPlayer)); (moved(flagship);captured) ),!.
 takeTurn(silverPlayer, goldenPlayer):-doPlayerMovement(silverPlayer), printBoard,  ((\+captured, doPlayerMovement(silverPlayer)); (captured) ),!.
+
+takeTurn(goldenPlayer, silverPlayer):-
+(playerGolden(human), doPlayerMovement(goldenPlayer), printBoard,( (\+moved(flagship), \+captured, printBoard, doPlayerMovement(goldenPlayer)); (moved(flagship);captured) );
+playerGolden(bot), validPlay(X, Y, Xf, Yf, goldenPlayer), doPlay(X, Y, Xf, Yf, goldenPlayer), printBoard,
+validPlay(X1, Y1, X1f, Y1f, goldenPlayer), (\+moved(flagship),\+captured,doPlay(X1, Y1, X1f, Y1f, goldenPlayer));(moved(flagship);captured), printBoard), !.
+
+takeTurn(silverPlayer, goldenPlayer):-
+(playerSilver(human), doPlayerMovement(silverPlayer), printBoard, ((\+captured,doPlayerMovement(silverPlayer));captured);
+playerSilver(bot), validPlay(X, Y, Xf, Yf, silverPlayer), doPlay(X, Y, Xf, Yf, silverPlayer), printBoard,
+validPlay(X1, Y1, X1f, Y1f, silverPlayer), (captured;(\+captured,doPlay(X1, Y1, X1f, Y1f, silverPlayer))), printBoard), !.
 
 doPlayerMovement(Player):-
 repeat,write(Player), write(' chooses a piece to move:'), nl,
