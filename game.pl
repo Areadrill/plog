@@ -53,10 +53,11 @@ playGame:-
 	takeTurn(CurrentPlayer, NewPlayer),
 	assert(currentPlayer(NewPlayer)),
 	printBoard,
-	fail.
+	wonGame(Victor),!, clearScreen,
+	write(Victor),write('won the game!').
 
-takeTurn(goldenPlayer,silverPlayer):- doPlayerMovement(goldenPlayer), ( (\+moved(flagship), \+captured, printBoard, doPlayerMovement(goldenPlayer)); (moved(flagship);captured) ),!.
-takeTurn(silverPlayer, goldenPlayer):-doPlayerMovement(silverPlayer), printBoard,  ((\+captured, doPlayerMovement(silverPlayer)); (captured) ),!.
+wonGame(goldenPlayer):- position(_,0,flagship);position(0,_,flagship);position(11,_,flagship);position(_,11,flagship);\+position(_,_,silverPiece).
+wonGame(silverPlayer):- \+position(_,_,flagship).
 
 takeTurn(goldenPlayer, silverPlayer):-
 (playerGolden(human), doPlayerMovement(goldenPlayer), printBoard,( (\+moved(flagship), \+captured, printBoard, doPlayerMovement(goldenPlayer)); (moved(flagship);captured) );
