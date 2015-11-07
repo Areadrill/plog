@@ -11,6 +11,9 @@
 :- dynamic(player/1).
 :- dynamic(currentPlayer/1).
 :- dynamic(moved/1).
+:- dynamic(moved/2).
+:- dynamic(captured/0).
+
 piece(goldenPiece).
 piece(silverPiece).
 piece(flagship).
@@ -42,19 +45,18 @@ playGame:-
 	assert(currentPlayer(Player)),
 	repeat,
 	retract(currentPlayer(CurrentPlayer)),
-	%write(Player),
-	retractall(moved(_)),
+	retractall(moved(_)), retractall(moved(_,_)),retractall(captured),
 	takeTurn(CurrentPlayer, NewPlayer),
 	assert(currentPlayer(NewPlayer)),
 	printBoard,
 	fail.
 
-takeTurn(goldenPlayer,silverPlayer):- doPlayerMovement(goldenPlayer), ( (\+moved(flagship), printBoard, doPlayerMovement(goldenPlayer)); moved(flagship) ).
-takeTurn(silverPlayer, goldenPlayer):-doPlayerMovement(silverPlayer), printBoard, doPlayerMovement(silverPlayer).
+takeTurn(goldenPlayer,silverPlayer):- doPlayerMovement(goldenPlayer), ( (\+moved(flagship), \+captured, printBoard, doPlayerMovement(goldenPlayer)); (moved(flagship);captured) ),!.
+takeTurn(silverPlayer, goldenPlayer):-doPlayerMovement(silverPlayer), printBoard,  ((\+captured, doPlayerMovement(silverPlayer)); (captured) ),!.
 
-doPlayerMovement(Player):-write(Player), write(' chooses a piece to move:'), nl,
-repeat,
-readCoordinates(Xi,Yi),owner(Player,Piece),position(Xi,Yi,Piece), !,
+doPlayerMovement(Player):-
+repeat,write(Player), write(' chooses a piece to move:'), nl,
+readCoordinates(Xi,Yi),owner(Player,Piece),position(Xi,Yi,Piece),\+moved(Xi,Yi), !,
 nl,write('destination:'),nl,
 repeat,
 readCoordinates(Xf,Yf),
@@ -119,23 +121,23 @@ calculateDistances(Xi, Yi, Xf, Yf, DX, DY):-
 	emptyCellsBetween(X,Y,Xf,Y):-Xf1 is Xf-1, findall(Z, position(Xf,Y,Z), [emptyCell]), emptyCellsBetween(X,Y,Xf1,Y).
 
 doPlay(X,Y,Xf,Yf,Player):- validMove(X,Y,Xf,Yf,Player),
-	owner(Player,Piece),retract(position(X,Y,Piece)),asserta(position(Xf,Yf,Piece)).
+	owner(Player,Piece),retract(position(X,Y,Piece)),asserta(position(Xf,Yf,Piece)), asserta(moved(Xf,Yf)).
 
 doPlay(X,Y,Xf,Yf,Player):- validCapture(X,Y,Xf,Yf,Player),
-	owner(Player,Piece), retract(position(X,Y,Piece)),opponent(Player, Opponent), owner(Opponent,OpponentPiece), retract(position(Xf,Yf,OpponentPiece)), asserta(position(Xf,Yf,Piece)).
+	owner(Player,Piece), retract(position(X,Y,Piece)),opponent(Player, Opponent), owner(Opponent,OpponentPiece), retract(position(Xf,Yf,OpponentPiece)), asserta(position(Xf,Yf,Piece)),asserta(captured), asserta(moved(Xf,Yf)).
 
-validPlay(X,Y,Xf,Yf,Player):- (validMove(X,Y,Xf,Yf,Player);validCapture(X,Y,Xf,Yf,Player)).
+validPlay(X,Y,Xf,Yf,Player):- (validMove(X,Y,Xf,Yf,Player);validCapture(X,Y,Xf,Yf,Player)),\+moved(X,Y).
 
-	validCapture(X,Y,Xf,Yf,Player):-
-	 opponent(Player, Opponent),
-	 owner(Opponent,OpponentPiece),
-	 position(Xf,Yf,OpponentPiece),
-	 (X =:= Xf-1; X =:= Xf+1),
-	 (Y =:= Yf-1; Y =:= Yf+1).
+validCapture(X,Y,Xf,Yf,Player):-
+ opponent(Player, Opponent),
+ owner(Opponent,OpponentPiece),
+ position(Xf,Yf,OpponentPiece),
+ (X =:= Xf-1; X =:= Xf+1),
+ (Y =:= Yf-1; Y =:= Yf+1).
 
-	validMove(X,Y,Xf,Yf, Player):- %movimento normal
-		owner(Player, Piece),
-		position(X,Y,Piece),
-		position(Xf,Yf, emptyCell),
-		findall(Z, position(Xf,Yf,Z), [emptyCell]),
-		emptySpace(X,Y,Xf,Yf).
+validMove(X,Y,Xf,Yf, Player):- %movimento normal
+owner(Player, Piece),
+position(X,Y,Piece),
+position(Xf,Yf, emptyCell),
+findall(Z, position(Xf,Yf,Z), [emptyCell]),
+emptySpace(X,Y,Xf,Yf).
