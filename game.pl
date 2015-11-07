@@ -148,6 +148,8 @@ doPlay(X,Y,Xf,Yf,Player):- validCapture(X,Y,Xf,Yf,Player),
 validPlay(X,Y,Xf,Yf,Player):- (validMove(X,Y,Xf,Yf,Player);validCapture(X,Y,Xf,Yf,Player)),\+moved(X,Y).
 
 validCapture(X,Y,Xf,Yf,Player):-
+ owner(Player, Piece),
+ position(X,Y,Piece),
  opponent(Player, Opponent),
  owner(Opponent,OpponentPiece),
  position(Xf,Yf,OpponentPiece),
