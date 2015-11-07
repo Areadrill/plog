@@ -10,6 +10,7 @@
 :- dynamic(position/3).
 :- dynamic(player/1).
 :- dynamic(currentPlayer/1).
+:- dynamic(moved/1).
 piece(goldenPiece).
 piece(silverPiece).
 piece(flagship).
@@ -34,7 +35,7 @@ startGame:- retractall(position(_,_,_)), assert(goldenPieces(0)), assert(silverP
 	playGame.
 
 teste:-fillBoard(0,0), asserta(position(1,1,goldenPiece)), asserta(position(0,0,silverPiece)), asserta(position(0,1,silverPiece)), asserta(position(0,2,silverPiece)), asserta(position(0,3,silverPiece)), asserta(position(4,4,goldenPiece)),
-asserta(position(4,5,goldenPiece)), asserta(position(4,6,goldenPiece)), asserta(position(4,3,goldenPiece)).
+asserta(position(4,5,goldenPiece)), asserta(position(4,6,goldenPiece)), asserta(position(4,3,goldenPiece)), asserta(position(5,5,flagship)).
 
 playGame:-
 	readPlayer(Player),
@@ -42,12 +43,13 @@ playGame:-
 	repeat,
 	retract(currentPlayer(CurrentPlayer)),
 	%write(Player),
+	retractall(moved(_)),
 	takeTurn(CurrentPlayer, NewPlayer),
 	assert(currentPlayer(NewPlayer)),
 	printBoard,
 	fail.
 
-takeTurn(goldenPlayer,silverPlayer):- doPlayerMovement(goldenPlayer), printBoard, doPlayerMovement(goldenPlayer).
+takeTurn(goldenPlayer,silverPlayer):- doPlayerMovement(goldenPlayer), ( (\+moved(flagship), printBoard, doPlayerMovement(goldenPlayer)); moved(flagship) ).
 takeTurn(silverPlayer, goldenPlayer):-doPlayerMovement(silverPlayer), printBoard, doPlayerMovement(silverPlayer).
 
 doPlayerMovement(Player):-write(Player), write(' chooses a piece to move:'), nl,
@@ -57,6 +59,8 @@ nl,write('destination:'),nl,
 repeat,
 readCoordinates(Xf,Yf),
 validPlay(Xi,Yi,Xf,Yf,Player),!,
+position(Xi,Yi,Piece),
+asserta(moved(Piece)),
 doPlay(Xi,Yi,Xf,Yf,Player).
 
 setupBoard:-
