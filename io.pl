@@ -35,6 +35,6 @@ write('1. Player vs Player'), nl,
 write('2. Player vs Bot'), nl,
 write('3. Bot vs Bot'), nl,
 getInt(Option, 'option'),
-(Option = 1, clearScreen, startGame;
-Option = 2, write('Under construction');
-Option = 3, write('Under construction')).
+(Option = 1, clearScreen, assert(playerGolden(human)), assert(playerSilver(human)), startGame;
+Option = 2, clearScreen, assert(playerGolden(human)), assert(playerSilver(bot)), startGame;
+Option = 3, clearScreen, assert(playerGolden(bot)), assert(playerSilver(bot)), startGame).

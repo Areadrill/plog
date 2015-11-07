@@ -45,14 +45,20 @@ playGame:-
 	assert(currentPlayer(Player)),
 	repeat,
 	retract(currentPlayer(CurrentPlayer)),
-	%write(Player),
 	takeTurn(CurrentPlayer, NewPlayer),
 	assert(currentPlayer(NewPlayer)),
 	printBoard,
 	fail.
 
-takeTurn(goldenPlayer, silverPlayer):-doPlayerMovement(goldenPlayer), printBoard, doPlayerMovement(goldenPlayer).
-takeTurn(silverPlayer, goldenPlayer):-doPlayerMovement(silverPlayer), printBoard, doPlayerMovement(silverPlayer).
+takeTurn(goldenPlayer, silverPlayer):-
+(playerGolden(human), doPlayerMovement(goldenPlayer), printBoard, doPlayerMovement(goldenPlayer);
+playerGolden(bot), validPlay(X, Y, Xf, Yf, goldenPlayer), doPlay(X, Y, Xf, Yf, goldenPlayer), printBoard,
+validPlay(X1, Y1, X1f, Y1f, goldenPlayer), doPlay(X1, Y1, X1f, Y1f, goldenPlayer), printBoard).
+
+takeTurn(silverPlayer, goldenPlayer):-
+(playerSilver(human), doPlayerMovement(silverPlayer), printBoard, doPlayerMovement(silverPlayer);
+playerSilver(bot), validPlay(X, Y, Xf, Yf, silverPlayer), doPlay(X, Y, Xf, Yf, silverPlayer), printBoard,
+validPlay(X1, Y1, X1f, Y1f, silverPlayer), doPlay(X1, Y1, X1f, Y1f, silverPlayer), printBoard).
 
 doPlayerMovement(Player):-write(Player), write(' chooses a piece to move:'), nl,
 repeat,
