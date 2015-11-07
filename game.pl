@@ -29,6 +29,10 @@ state(begin).
 state(game).
 state(over).
 
+breakthru:-
+mainMenu.
+
+
 startGame:- retractall(position(_,_,_)), assert(goldenPieces(0)), assert(silverPieces(0)),
 	setupBoard,
 	playGame.
@@ -47,7 +51,7 @@ playGame:-
 	printBoard,
 	fail.
 
-takeTurn(goldenPlayer,silverPlayer):- doPlayerMovement(goldenPlayer), printBoard, doPlayerMovement(goldenPlayer).
+takeTurn(goldenPlayer, silverPlayer):-doPlayerMovement(goldenPlayer), printBoard, doPlayerMovement(goldenPlayer).
 takeTurn(silverPlayer, goldenPlayer):-doPlayerMovement(silverPlayer), printBoard, doPlayerMovement(silverPlayer).
 
 doPlayerMovement(Player):-write(Player), write(' chooses a piece to move:'), nl,

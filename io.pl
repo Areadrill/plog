@@ -14,3 +14,27 @@ readPlayer(X):-
 	write('Golden player chooses a player to start the game (silverPlayer. or goldenPlayer.)'), nl,
 	read(X),
 	player(X),!.
+
+cls:-write('\e[2J').
+
+mainMenu:-
+write('Welcome to Breakthru!'), nl, nl,
+write('What would you like to do: '), nl,
+write('1. Play game'), nl,
+write('2. Tutorial'), nl,
+write('3. Exit'), nl,
+repeat,
+getInt(Option, 'option'),
+(Option = 1, cls, playMenu;
+Option = 2, cls, tutorial;
+Option = 3).
+
+playMenu:-
+write('How would you like to play: '), nl,
+write('1. Player vs Player'), nl,
+write('2. Player vs Bot'), nl,
+write('3. Bot vs Bot'), nl,
+getInt(Option, 'option'),
+(Option = 1, cls, startGame;
+Option = 2, write('Under construction');
+Option = 3, write('Under construction')).

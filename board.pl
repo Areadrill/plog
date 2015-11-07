@@ -3,7 +3,7 @@ symbol(flagship, 'F').
 symbol(silverPiece, 'p').
 symbol(goldenPiece, 'd').
 
-printBoard:- printBoard(0,0),!.
+printBoard:- cls, printBoard(0,0),!.
 
 printBoard(_,11):- write(' ----------------------------------------------'),nl,
 	write('   0   1   2   3   4   5   6   7   8   9  10'), nl.
