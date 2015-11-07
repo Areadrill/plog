@@ -1,4 +1,6 @@
 :- use_module(library(random)).
+:- use_module(library(system)).
+:- use_module(library(lists)).
 :- include('board.pl').
 :- include('util.pl').
 :- include('io.pl').
@@ -34,6 +36,7 @@ mainMenu.
 
 
 startGame:- retractall(position(_,_,_)), assert(goldenPieces(0)), assert(silverPieces(0)),
+	setRandSeed,
 	setupBoard,
 	playGame.
 
@@ -52,13 +55,13 @@ playGame:-
 
 takeTurn(goldenPlayer, silverPlayer):-
 (playerGolden(human), doPlayerMovement(goldenPlayer), printBoard, doPlayerMovement(goldenPlayer);
-playerGolden(bot), validPlay(X, Y, Xf, Yf, goldenPlayer), doPlay(X, Y, Xf, Yf, goldenPlayer), printBoard,
-validPlay(X1, Y1, X1f, Y1f, goldenPlayer), doPlay(X1, Y1, X1f, Y1f, goldenPlayer), printBoard), !.
+playerGolden(bot), randomPlay(goldenPlayer, Pred1), Pred =.. Pred1, Pred, printBoard,
+randomPlay(goldenPlayer, Pred2), PredD =.. Pred2, PredD, doPlay(X1, Y1, X1f, Y1f, goldenPlayer), printBoard), !.
 
 takeTurn(silverPlayer, goldenPlayer):-
 (playerSilver(human), doPlayerMovement(silverPlayer), printBoard, doPlayerMovement(silverPlayer);
-playerSilver(bot), validPlay(X, Y, Xf, Yf, silverPlayer), doPlay(X, Y, Xf, Yf, silverPlayer), printBoard,
-validPlay(X1, Y1, X1f, Y1f, silverPlayer), doPlay(X1, Y1, X1f, Y1f, silverPlayer), printBoard), !.
+playerSilver(bot), randomPlay(silverPlayer, Pred1), Pred =.. Pred1, Pred, printBoard,
+randomPlay(silverPlayer, Pred2), PredD =.. Pred2, PredD, doPlay(X1, Y1, X1f, Y1f, silverPlayer), printBoard), !.
 
 doPlayerMovement(Player):-write(Player), write(' chooses a piece to move:'), nl,
 repeat,
@@ -145,3 +148,11 @@ validPlay(X,Y,Xf,Yf,Player):- (validMove(X,Y,Xf,Yf,Player);validCapture(X,Y,Xf,Y
 		position(Xf,Yf, emptyCell),
 		findall(Z, position(Xf,Yf,Z), [emptyCell]),
 		emptySpace(X,Y,Xf,Yf).
+
+randomPlay(CurrPlayer, Pred):-
+findall([Xi,Yi,Xf,Yf], validMove(Xi,Yi,Xf,Yf,CurrPlayer), Possiveis),
+length(Possiveis, N),
+random(0, N, NList),
+nth0(NList, Possiveis, ChosenPlay),
+append(ChosenPlay, [CurrPlayer], AlmostPred),
+append([doPlay], AlmostPred, Pred).
