@@ -41,7 +41,7 @@ mainMenu.
 
 startGame:- retractall(position(_,_,_)), assert(goldenPieces(0)), assert(silverPieces(0)),
 	setRandSeed,
-	setupBoard,
+	setupBoard,	
 	playGame.
 
 teste:-fillBoard(0,0), asserta(position(1,1,goldenPiece)), asserta(position(0,0,silverPiece)), asserta(position(0,1,silverPiece)), asserta(position(0,2,silverPiece)), asserta(position(0,3,silverPiece)), asserta(position(4,4,goldenPiece)),
@@ -55,11 +55,11 @@ playGame:-
 	retractall(moved(_)), retractall(moved(_,_)),retractall(captured),
 	takeTurn(CurrentPlayer, NewPlayer),
 	assert(currentPlayer(NewPlayer)),
-	printBoard,
+	printBoard, get_char(_),
 	wonGame(Victor),!, clearScreen,
-	write(Victor),write('won the game!').
+	write(Victor),write(' won the game!').
 
-wonGame(goldenPlayer):- position(_,0,flagship);position(0,_,flagship);position(11,_,flagship);position(_,11,flagship);\+position(_,_,silverPiece).
+wonGame(goldenPlayer):- position(_,0,flagship);position(0,_,flagship);position(10,_,flagship);position(_,10,flagship);\+position(_,_,silverPiece).
 wonGame(silverPlayer):- \+position(_,_,flagship).
 
 takeTurn(goldenPlayer, silverPlayer):-
@@ -67,7 +67,16 @@ playerGolden(human), doPlayerMovement(goldenPlayer), printBoard,( (\+moved(flags
 
 takeTurn(goldenPlayer, silverPlayer):-
 playerGolden(bot), difficulty(goldenPlayer, random), randomPlay(goldenPlayer, Pred1), Pred =.. Pred1, Pred, printBoard,
-(\+moved(flagship),\+captured, randomMove(goldenPlayer, Pred2), PredD =.. Pred2, PredD);((moved(flagship);captured), printBoard), !.
+((\+moved(flagship),\+captured, randomMove(goldenPlayer, Pred2), PredD =.. Pred2, PredD);((moved(flagship);captured), printBoard)), !.
+
+takeTurn(goldenPlayer, silverPlayer):-
+	 playerGolden(bot), difficulty(goldenPlayer, greedy),
+	 ((flagshipCanEscape(Xf, Yf), position(X, Y, flagship), doPlay(X, Y, Xf, Yf, goldenPlayer));
+	 (validCapture(X,Y,Xf,Yf, goldenPlayer), doPlay(X,Y,Xf,Yf, goldenPlayer));
+	 (randomMove(goldenPlayer, Pred1), Pred =.. Pred1, Pred)),!,
+	 (  (moved(flagship);captured;wonGame(_));
+	 	 (\+captured,\+moved(flagship),\+wonGame(_), randomMove(goldenPlayer, Pred2), PredD =.. Pred2, PredD)),!.
+
 
 takeTurn(silverPlayer, goldenPlayer):-
 playerSilver(human), doPlayerMovement(silverPlayer), printBoard, ((\+captured,doPlayerMovement(silverPlayer));captured),!.
@@ -80,8 +89,8 @@ takeTurn(silverPlayer, goldenPlayer):-playerSilver(bot), difficulty(silverPlayer
 	(validCapture(X,Y,Xf,Yf, silverPlayer), doPlay(X,Y,Xf,Yf,silverPlayer));
 	(randomMove(silverPlayer, Pred1), Pred =.. Pred1, Pred)),!,
 (  captured;
-	 (\+captured,  blockFlagship(X,Y,Xf,Yf), doPlay(X,Y,Xf,Yf,silverPlayer));
-	 (randomMove(silverPlayer, Pred1), Pred =.. Pred1, Pred)).
+	 (\+captured, blockFlagship(X,Y,Xf,Yf), doPlay(X,Y,Xf,Yf,silverPlayer));
+	 (\+captured, randomMove(silverPlayer, Pred2), PredD =.. Pred2, PredD)),!.
 
 doPlayerMovement(Player):-
 	repeat,write(Player), write(' chooses a piece to move:'), nl,
