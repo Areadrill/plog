@@ -15,7 +15,7 @@
 \setlength{\textheight}{22cm}
 
 \title{\Huge\textbf{Breakthru}\linebreak\linebreak\linebreak
-\Large\textbf{Relatório Intercalar}\linebreak\linebreak
+\Large\textbf{Relatório Final}\linebreak\linebreak
 \linebreak\linebreak
 \includegraphics[scale=0.1]{feup-logo.png}\linebreak\linebreak
 \linebreak\linebreak
@@ -33,49 +33,25 @@ João Bernardo Martins de Sousa e Silva Mota - 201303462 \\
 \maketitle
 \thispagestyle{empty}
 
-%************************************************************************************************
-%************************************************************************************************
+\section{Resumo}
+No contexto da unidade curricular Programação em Lógica do MIEIC foi solicitada a implementação de um jogo de tabuleiro a ser selecionado pelo grupo.
 
+Para a implementação deste jogo o grupo mobilizou os seus conhecimentos acerca de PROLOG e das capacidades generativas que o mesmo proporciona e que se revelaram de elevada importância para permitir o desenvolvimento de um jogo do ponto de vista declarativo, tornando-se apenas necessário explicitar em PROLOG as regras de funcionamento do jogo.
+
+O acima exposto evidencia a acentuada diferença paradigmática da programação nesta linguagem, que representou para o grupo um desafio mas também uma oportunidade de adquirir destreza mental no que à programação em lógica diz respeito.
+
+
+
+\tableofcontents
 \newpage
 
-%Todas as figuras devem ser referidas no texto. %\ref{fig:codigoFigura}
-%
-%%Exemplo de código para inserção de figuras
-%%\begin{figure}[h!]
-%%\begin{center}
-%%escolher entre uma das seguintes três linhas:
-%%\includegraphics[height=20cm,width=15cm]{path relativo da imagem}
-%%\includegraphics[scale=0.5]{path relativo da imagem}
-%%\includegraphics{path relativo da imagem}
-%%\caption{legenda da figura}
-%%\label{fig:codigoFigura}
-%%\end{center}
-%%\end{figure}
-%
-%
-%\textit{Para escrever em itálico}
-%\textbf{Para escrever em negrito}
-%Para escrever em letra normal
-%``Para escrever texto entre aspas''
-%
-%Para fazer parágrafo, deixar uma linha em branco.
-%
-%Como fazer bullet points:
-%\begin{itemize}
-	%\item Item1
-	%\item Item2
-%\end{itemize}
-%
-%Como enumerar itens:
-%\begin{enumerate}
-	%\item Item 1
-	%\item Item 2
-%\end{enumerate}
-%
-%\begin{quote}``Isto é uma citação''\end{quote}
+\section{Introdução}
+Foi proposta a implementação do jogo \textit{Breakthru} em PROLOG com uma interface textual e com a possibilidade de ser jogado em três modos diversos: humano contra humano, humano contra máquina e máquina contra máquina. Foi solicitado que o mecanismo de jogo da máquina apresentasse dois níveis distintos de dificuldade.
 
+O presente relatório principia por apresentar o jogo desenvolvido, o seu contexto histórico e as regras que o regem. De seguida são apresentadas as principais estruturações programáticas do mesmo, do ponto de vista do modelo de dados usado e dos predicados lógicos fundamentais da implementação desenvolvida. Em particular é apresentada a representação interna do estado do jogo, os predicados usados para apresentar externamente essa mesma representação, bem como diversos predicados e restante lógica de movimentação de peças que permita verificar o cumprimento das regras por parte dos jogadores humanos e a escolha de jogadas por parte do computador, quando em controlo de um dos jogadores. São depois tecidas considerações sobre a interface com o utilizador e suas funcionalidades e implementação.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%
+Encerra-se o relatório com uma breve reflexão sobre o trabalho desenvolvido, suas limitações e aspetos que ficam em aberto para eventuais futuras melhorias.
+
 \section{O Jogo Breakthru}
 O \emph{Breakthru} é um jogo de estratégia abstrata para dois jogadores em que cada lado começa com um número diferente de peças, colocadas em posições assimétricas e com objetivos diferentes para assegurar a vitória.
 
@@ -105,8 +81,8 @@ O jogador prateado ganha o jogo ao capturar o navio almirante dourado. O jogador
 
 \begin{figure}
 \centering
-\includegraphics[scale=1]{Breakthru_board.png} 
-\centering 
+\includegraphics[scale=1]{Breakthru_board.png}
+\centering
 \caption{Uma posição inicial possível das peças num tabuleiro de Breakthru}
 \label{fig:init}
 \end{figure}
@@ -132,7 +108,7 @@ O tabuleiro é representado como uma lista de listas. De seguida apresentam-se  
 
 Possível estado inicial:
 
-\begin{verbatim} 
+\begin{verbatim}
 [[' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
  [' ',' ',' ','p','p','p','p','p',' ',' ',' '],
  [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
@@ -143,7 +119,7 @@ Possível estado inicial:
  [' ','p',' ',' ','d','d','d',' ',' ','p',' '],
  [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
  [' ',' ','p','p','p','p','p','p',' ',' ',' '],
- [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '] ] 
+ [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '] ]
 \end{verbatim}
 
 Possível estado intermédio:
@@ -173,7 +149,7 @@ Possível estado final, onde as peças douradas venceram porque o navio almirant
  [' ','p',' ','p','d',' ','d',' ',' ','p',' '],
  [' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '],
  [' ',' ','p','','d',' ','p','p',' ',' ',' '],
- [' ',' ',' ',' ',' ','F',' ',' ',' ',' ',' '] ] 
+ [' ',' ',' ',' ',' ','F',' ',' ',' ',' ',' '] ]
 \end{verbatim}
 
 
@@ -217,6 +193,11 @@ movePiece(RowOrigin, ColumnOrigin, RowDestiny, ColumnDestiny,
 capturePiece(RowOrigin, ColumnOrigin, RowDestiny, ColumnDestiny,
  Player, Board, NewBoard):-
 \end{verbatim}
+
+\section{Conclusão}
+Ficaram, no entender do grupo, fortemente evidenciadas as vantagens situacionais do uso do paradigma em causa para abordar a classe de problemas que frequentemente surgem no desenvolvimento de simuladores de jogos de tabuleiros. Com efeito, o trabalho desenvolvido evidencia que, recorrendo a capacidades que são exclusivas da programação em lógica, se torna possível exprimir de forma sucinta funcionalidades de um programa que se revelariam de elevada complexidade, do ponto de vista da implementação. O PROLOG permite em larga medida que o programador prescinda da necessidade de especificar um modelo de execução, o que constitui, regra geral, o maior desafio para a implementação deste tipo de programas.
+
+O trabalho apresenta como principal limitação o facto de a inteligência artificial implementada para o segundo nível de dificuldade não apresentar uma função de avaliação do tabuleiro plenamente desenvolvida. A lógica de avaliação implementada é essencialmente binária: a máquina procura a cada passo garantir somente que não vai perder no passo seguinte e que captura ao adversário o máximo de peças possíveis, sendo que os restantes movimentos são selecionados, à falta de heurística desenvolvida, de uma forma aleatória. Considerou-se o desenvolvimento de tal função de avaliação e do seu uso num algoritmo \textit{Minimax}, mas limitações ao nível do tempo e da compreensão plena deste algoritmo, que não foi extensivamente abordado nas aulas da Unidade Curricular, não no-lo permitiram.
 
 
 \end{document}
