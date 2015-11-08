@@ -35,7 +35,7 @@ state(begin).
 state(game).
 state(over).
 
-breakthru:-
+breakthru:-retractall(playerGolden(_)), retractall(playerSilver(_)),
 mainMenu.
 
 
@@ -72,15 +72,15 @@ playerSilver(bot), randomPlay(silverPlayer, Pred1), Pred =.. Pred1, Pred, (captu
 
 
 doPlayerMovement(Player):-
-repeat,write(Player), write(' chooses a piece to move:'), nl,
-readCoordinates(Xi,Yi),owner(Player,Piece),position(Xi,Yi,Piece),\+moved(Xi,Yi), !,
-nl,write('destination:'),nl,
-repeat,
-readCoordinates(Xf,Yf),
-validPlay(Xi,Yi,Xf,Yf,Player),!,
-position(Xi,Yi,Piece),
-asserta(moved(Piece)),
-doPlay(Xi,Yi,Xf,Yf,Player).
+	repeat,write(Player), write(' chooses a piece to move:'), nl,
+	readCoordinates(Xi,Yi),owner(Player,Piece),position(Xi,Yi,Piece),\+moved(Xi,Yi), !,
+	nl,write('destination:'),nl,
+	repeat,
+	readCoordinates(Xf,Yf),
+	validPlay(Xi,Yi,Xf,Yf,Player),!,
+	position(Xi,Yi,Piece),
+	asserta(moved(Piece)),
+	doPlay(Xi,Yi,Xf,Yf,Player).
 
 setupBoard:-
 	fillBoard,
@@ -88,14 +88,32 @@ setupBoard:-
 	placePiece(goldenPlayer, 0).
 
 placePiece(goldenPlayer, 4):- placePiece(silverPlayer, 0).
-placePiece(goldenPlayer, N):- N1 is N+1, N < 4,
+placePiece(goldenPlayer, N):-playerGolden(human),
+	N1 is N+1, N < 4,
 	write('New piece for golden player:'), nl,
 	repeat,
 	readCoordinates(X,Y),
 	validateCoordinates(X,Y, goldenPlayer),!,
 	asserta(position(X,Y,goldenPiece)),
-		printBoard,!,
+	printBoard,!,
 	placePiece(goldenPlayer, N1).
+
+placePiece(goldenPlayer,N):-
+	playerGolden(bot),
+	N1 is N+1, N < 4,
+	randomPlacement(goldenPlayer, X, Y),
+	asserta(position(X,Y,goldenPiece)),
+	printBoard,!,
+	placePiece(goldenPlayer, N1).
+
+	placePiece(silverPlayer,N):-
+		playerSilver(bot),
+		N1 is N+1, N < 4,
+		randomPlacement(silverPlayer, X, Y),
+		asserta(position(X,Y,silverPiece)),
+		printBoard,!,
+		placePiece(silverPlayer, N1).
+
 
 placePiece(silverPlayer, 4).
 placePiece(silverPlayer, N):- N1 is N+1, N< 4,
@@ -107,10 +125,12 @@ placePiece(silverPlayer, N):- N1 is N+1, N< 4,
 	printBoard,!,
 	placePiece(silverPlayer, N1).
 
-boardFull:- goldenPieces(N), flagships(F), silverPieces(J),
-	J == 4, %devia ser 20
-	N == 4, %devia ser 11
-	F == 1. %taboum
+
+possiblePlace(Player, X, Y):-
+	position(X,Y,emptyCell),
+	findall(C, position(X,Y,C), [emptyCell]),
+	validateCoordinates(X,Y,Player).
+
 
 validateCoordinates( X, Y, goldenPlayer):-
 	X > 2, X < 8,
@@ -125,7 +145,7 @@ calculateDistances(Xi, Yi, Xf, Yf, DX, DY):-
 	DX is Xf - Xi,
 	DY is Yf - Yi.
 
-	emptySpace(X,Y,X,Y):- fail.
+
 	emptySpace(X,Y,Xf,Y):- X>Xf, X1 is X-1, emptyCellsBetween(X1,Y,Xf,Y).
 	emptySpace(X,Y,Xf,Y):- X < Xf, X1 is X+1, emptyCellsBetween(X1, Y, Xf, Y).
 	emptySpace(X,Y,X,Yf):- Y> Yf, Y1 is Y-1, emptyCellsBetween(X,Y1,X, Yf).
@@ -176,3 +196,9 @@ random(0, N, NList),
 nth0(NList, Possiveis, ChosenPlay),
 append(ChosenPlay, [CurrPlayer], AlmostPred),
 append([doPlay], AlmostPred, Pred).
+
+randomPlacement(CurrPlayer, X,Y):-
+	findall([Xp, Yp], possiblePlace(CurrPlayer, Xp, Yp), Possiveis),
+	length(Possiveis, N),
+	random(0, N, NList),
+	nth0(NList, Possiveis, [X,Y]).
