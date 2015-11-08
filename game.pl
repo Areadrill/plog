@@ -5,7 +5,7 @@
 :- include('util.pl').
 :- include('io.pl').
 
-:- dynamic(flagships/1).
+
 :- dynamic(silverPieces/1).
 :- dynamic(goldenPieces/1).
 :- dynamic(gameState/2).
@@ -48,8 +48,9 @@ teste:-fillBoard(0,0), asserta(position(1,1,goldenPiece)), asserta(position(0,0,
 asserta(position(4,5,goldenPiece)), asserta(position(4,6,goldenPiece)), asserta(position(4,3,goldenPiece)), asserta(position(5,5,flagship)).
 
 playGame:-
-	readPlayer(Player, 'goldenPlayer chooses a player to start the game (goldenPlayer. or silverPlayer.).'),
-	assert(currentPlayer(Player)),
+	( (\+playerGolden(bot),readPlayer(Player, 'goldenPlayer chooses a player to start the game (goldenPlayer. or silverPlayer.).')); (playerGolden(bot), random(0, 2, N), nth0(N, [goldenPlayer, silverPlayer], Player)
+	)),
+assert(currentPlayer(Player)),
 	repeat,
 	retract(currentPlayer(CurrentPlayer)),
 	retractall(moved(_)), retractall(moved(_,_)),retractall(captured),
