@@ -9,9 +9,9 @@ readCoordinates(X1, Y1):-
  getInt(X1, 'x'),nl,
  getInt(Y1, 'y').
 
-readPlayer(X):-
+readPlayer(X, Prompt):-
 	repeat,
-	write('Golden player chooses a player to start the game (silverPlayer. or goldenPlayer.)'), nl,
+	write(Prompt), nl,
 	read(X),
 	player(X),!.
 
@@ -37,7 +37,7 @@ write('3. Bot vs Bot'), nl,
 repeat,
 getInt(Option, 'option'),
 (Option = 1, clearScreen, assert(playerGolden(human)), assert(playerSilver(human)), startGame;
-Option = 2, clearScreen, assert(playerGolden(human)), assert(playerSilver(bot)), botDiffMenu(silverPlayer), startGame;
+Option = 2, clearScreen, chooseSideMenu, startGame;
 Option = 3, clearScreen, assert(playerGolden(bot)), botDiffMenu(goldenPlayer), assert(playerSilver(bot)), botDiffMenu(silverPlayer), startGame).
 
 botDiffMenu(Player):-
@@ -48,3 +48,8 @@ botDiffMenu(Player):-
 	getInt(Option, 'option'),
 	(Option = 1, clearScreen, assert(difficulty(Player, random));
 	Option = 2, clearScreen, assert(difficulty(Player, greedy))).
+
+chooseSideMenu:-
+	readPlayer(Player, 'Choose which side you want to be on (silverPlayer. or goldenPlayer.)'),
+	(Player = goldenPlayer, assert(playerGolden(human)), assert(playerSilver(bot)), botDiffMenu(silverPlayer);
+	Player = silverPlayer, assert(playerSilver(human)), assert(playerGolden(bot)), botDiffMenu(goldenPlayer)).

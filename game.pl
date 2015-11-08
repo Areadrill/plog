@@ -48,7 +48,7 @@ teste:-fillBoard(0,0), asserta(position(1,1,goldenPiece)), asserta(position(0,0,
 asserta(position(4,5,goldenPiece)), asserta(position(4,6,goldenPiece)), asserta(position(4,3,goldenPiece)), asserta(position(5,5,flagship)).
 
 playGame:-
-	readPlayer(Player),
+	readPlayer(Player, 'goldenPlayer chooses a player to start the game (goldenPlayer. or silverPlayer.).'),
 	assert(currentPlayer(Player)),
 	repeat,
 	retract(currentPlayer(CurrentPlayer)),
@@ -108,7 +108,7 @@ setupBoard:-
 	asserta(position(5,5,flagship)),
 	placePiece(goldenPlayer, 0).
 
-placePiece(goldenPlayer, 3):- placePiece(silverPlayer, 0).
+placePiece(goldenPlayer, 12):- placePiece(silverPlayer, 0).
 placePiece(goldenPlayer, N):-playerGolden(human),
 	N1 is N+1, N < 12,
 	write('New piece for golden player:'), nl,
@@ -121,7 +121,7 @@ placePiece(goldenPlayer, N):-playerGolden(human),
 
 placePiece(goldenPlayer,N):-
 	playerGolden(bot),
-	N1 is N+1, N < 3,
+	N1 is N+1, N < 12,
 	randomPlacement(goldenPlayer, X, Y),
 	asserta(position(X,Y,goldenPiece)),
 	printBoard,!,
