@@ -34,7 +34,17 @@ write('How would you like to play: '), nl,
 write('1. Player vs Player'), nl,
 write('2. Player vs Bot'), nl,
 write('3. Bot vs Bot'), nl,
+repeat,
 getInt(Option, 'option'),
 (Option = 1, clearScreen, assert(playerGolden(human)), assert(playerSilver(human)), startGame;
-Option = 2, clearScreen, assert(playerGolden(human)), assert(playerSilver(bot)), startGame;
-Option = 3, clearScreen, assert(playerGolden(bot)), assert(playerSilver(bot)), startGame).
+Option = 2, clearScreen, assert(playerGolden(human)), assert(playerSilver(bot)), botDiffMenu(silverPlayer), startGame;
+Option = 3, clearScreen, assert(playerGolden(bot)), botDiffMenu(goldenPlayer), assert(playerSilver(bot)), botDiffMenu(silverPlayer), startGame).
+
+botDiffMenu(Player):-
+	write('Choose bot difficulty for '), write(Player), write(': '), nl,
+	write('1. Random Mode'), nl,
+	write('2. Greedy Mode'), nl,
+	repeat,
+	getInt(Option, 'option'),
+	(Option = 1, clearScreen, assert(difficulty(Player, random));
+	Option = 2, clearScreen, assert(difficulty(Player, greedy))).

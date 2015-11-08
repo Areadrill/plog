@@ -63,12 +63,17 @@ wonGame(goldenPlayer):- position(_,0,flagship);position(0,_,flagship);position(1
 wonGame(silverPlayer):- \+position(_,_,flagship).
 
 takeTurn(goldenPlayer, silverPlayer):-
-(playerGolden(human), doPlayerMovement(goldenPlayer), printBoard,( (\+moved(flagship), \+captured, printBoard, doPlayerMovement(goldenPlayer)); (moved(flagship);captured) );
-playerGolden(bot), randomPlay(goldenPlayer, Pred1), Pred =.. Pred1, Pred, printBoard, (\+moved(flagship),\+captured, randomMove(goldenPlayer, Pred2), PredD =.. Pred2, PredD);(moved(flagship);captured), printBoard), !.
+playerGolden(human), doPlayerMovement(goldenPlayer), printBoard,( (\+moved(flagship), \+captured, printBoard, doPlayerMovement(goldenPlayer)); (moved(flagship);captured)),!.
+
+takeTurn(goldenPlayer, silverPlayer):-
+playerGolden(bot), difficulty(goldenPlayer, random), randomPlay(goldenPlayer, Pred1), Pred =.. Pred1, Pred, printBoard,
+(\+moved(flagship),\+captured, randomMove(goldenPlayer, Pred2), PredD =.. Pred2, PredD);((moved(flagship);captured), printBoard), !.
 
 takeTurn(silverPlayer, goldenPlayer):-
-(playerSilver(human), doPlayerMovement(silverPlayer), printBoard, ((\+captured,doPlayerMovement(silverPlayer));captured);
-playerSilver(bot), randomPlay(silverPlayer, Pred1), Pred =.. Pred1, Pred, (captured;(\+captured,randomMove(silverPlayer, Pred2), PredD =.. Pred2, PredD)), printBoard), !.
+playerSilver(human), doPlayerMovement(silverPlayer), printBoard, ((\+captured,doPlayerMovement(silverPlayer));captured),!.
+
+takeTurn(silverPlayer, goldenPlayer):-
+playerSilver(bot), randomPlay(silverPlayer, Pred1), Pred =.. Pred1, Pred, (captured;(\+captured,randomMove(silverPlayer, Pred2), PredD =.. Pred2, PredD)), printBoard, !.
 
 
 doPlayerMovement(Player):-
@@ -87,9 +92,9 @@ setupBoard:-
 	asserta(position(5,5,flagship)),
 	placePiece(goldenPlayer, 0).
 
-placePiece(goldenPlayer, 4):- placePiece(silverPlayer, 0).
+placePiece(goldenPlayer, 12):- placePiece(silverPlayer, 0).
 placePiece(goldenPlayer, N):-playerGolden(human),
-	N1 is N+1, N < 4,
+	N1 is N+1, N < 12,
 	write('New piece for golden player:'), nl,
 	repeat,
 	readCoordinates(X,Y),
@@ -100,7 +105,7 @@ placePiece(goldenPlayer, N):-playerGolden(human),
 
 placePiece(goldenPlayer,N):-
 	playerGolden(bot),
-	N1 is N+1, N < 4,
+	N1 is N+1, N < 12,
 	randomPlacement(goldenPlayer, X, Y),
 	asserta(position(X,Y,goldenPiece)),
 	printBoard,!,
@@ -108,15 +113,15 @@ placePiece(goldenPlayer,N):-
 
 	placePiece(silverPlayer,N):-
 		playerSilver(bot),
-		N1 is N+1, N < 4,
+		N1 is N+1, N < 20,
 		randomPlacement(silverPlayer, X, Y),
 		asserta(position(X,Y,silverPiece)),
 		printBoard,!,
 		placePiece(silverPlayer, N1).
 
 
-placePiece(silverPlayer, 4).
-placePiece(silverPlayer, N):- N1 is N+1, N< 4,
+placePiece(silverPlayer, 20).
+placePiece(silverPlayer, N):- N1 is N+1, N< 20,
 	write('New piece for silver player:'), nl,
 	repeat,
 	readCoordinates(X,Y),
@@ -202,3 +207,18 @@ randomPlacement(CurrPlayer, X,Y):-
 	length(Possiveis, N),
 	random(0, N, NList),
 	nth0(NList, Possiveis, [X,Y]).
+
+flagshipCanEscape(X,Y):-
+	position(Fx,Fy,flagship),
+	( ( emptySpace(Fx,Fy,X,10), Y is 10);
+		(emptySpace(Fx,Fy,X,0), Y is 0);
+		(emptySpace(Fx,Fy,10,Y), X is 10);
+		(emptySpace(Fx,Fy,0,Y), X is 0) ).
+
+	blockFlagship(X,Y,Xj,Yj):-
+		position(Xf,Yf,flagship),
+		flagshipCanEscape(Xe,Ye),
+		((Xe = Xf, Ye > Yf, validMove(X,Y,Xe, Yj,silverPlayer), Yj > Yf, Xj is Xe ); %escapa para baixo
+		(Xe = Xf, Ye < Yf, validMove(X,Y,Xe, Yj,silverPlayer), Yj < Yf, Xj is Xe ); %escapa para cima
+		(Ye = Yf, Xe > Xf, validMove(X,Y,Xj, Ye,silverPlayer), Xj > Xf, Yj is Ye ); %escapa para a direita
+		(Ye = Yf, Xe < Xf, validMove(X,Y,Xj, Ye,silverPlayer), Xj < Xf, Yj is Ye )). %escapa para a esquerda
