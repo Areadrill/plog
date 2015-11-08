@@ -41,7 +41,7 @@ mainMenu.
 
 startGame:- retractall(position(_,_,_)), assert(goldenPieces(0)), assert(silverPieces(0)),
 	setRandSeed,
-	setupBoard,	
+	setupBoard,
 	playGame.
 
 teste:-fillBoard(0,0), asserta(position(1,1,goldenPiece)), asserta(position(0,0,silverPiece)), asserta(position(0,1,silverPiece)), asserta(position(0,2,silverPiece)), asserta(position(0,3,silverPiece)), asserta(position(4,4,goldenPiece)),
@@ -55,7 +55,7 @@ playGame:-
 	retractall(moved(_)), retractall(moved(_,_)),retractall(captured),
 	takeTurn(CurrentPlayer, NewPlayer),
 	assert(currentPlayer(NewPlayer)),
-	printBoard, get_char(_),
+	printBoard,
 	wonGame(Victor),!, clearScreen,
 	write(Victor),write(' won the game!').
 
@@ -108,7 +108,7 @@ setupBoard:-
 	asserta(position(5,5,flagship)),
 	placePiece(goldenPlayer, 0).
 
-placePiece(goldenPlayer, 12):- placePiece(silverPlayer, 0).
+placePiece(goldenPlayer, 3):- placePiece(silverPlayer, 0).
 placePiece(goldenPlayer, N):-playerGolden(human),
 	N1 is N+1, N < 12,
 	write('New piece for golden player:'), nl,
@@ -121,11 +121,13 @@ placePiece(goldenPlayer, N):-playerGolden(human),
 
 placePiece(goldenPlayer,N):-
 	playerGolden(bot),
-	N1 is N+1, N < 12,
+	N1 is N+1, N < 3,
 	randomPlacement(goldenPlayer, X, Y),
 	asserta(position(X,Y,goldenPiece)),
 	printBoard,!,
 	placePiece(goldenPlayer, N1).
+
+	placePiece(silverPlayer,N):-playerSilver(bot), difficulty(silverPlayer, greedy),blockFlagshipPlacement, N1 is N-1, printBoard, !, placePiece(silverPlayer, N-1).
 
 	placePiece(silverPlayer,N):-
 		playerSilver(bot),
@@ -238,3 +240,11 @@ flagshipCanEscape(X,Y):-
 		(Xe = Xf, Ye < Yf, validMove(X,Y,Xe, Yj,silverPlayer), Yj < Yf, Xj is Xe ); %escapa para cima
 		(Ye = Yf, Xe > Xf, validMove(X,Y,Xj, Ye,silverPlayer), Xj > Xf, Yj is Ye ); %escapa para a direita
 		(Ye = Yf, Xe < Xf, validMove(X,Y,Xj, Ye,silverPlayer), Xj < Xf, Yj is Ye )). %escapa para a esquerda
+
+		blockFlagshipPlacement:-
+			position(Xf,Yf,flagship),
+			flagshipCanEscape(Xe,Ye),
+			((Xe = Xf, Ye > Yf, asserta(position(Xe,10,silverPiece))); %escapa para baixo
+			(Xe = Xf, Ye < Yf, asserta(position(Xe,0,silverPiece))); %escapa para cima
+			(Ye = Yf, Xe > Xf, asserta(position(10,Ye,silverPiece))); %escapa para a direita
+			(Ye = Yf, Xe < Xf, asserta(position(0,Ye,silverPiece)))). %escapa para a esquerda
