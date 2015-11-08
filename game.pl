@@ -35,7 +35,7 @@ state(begin).
 state(game).
 state(over).
 
-breakthru:-retractall(playerGolden(_)), retractall(playerSilver(_)),
+breakthru:-retractall(playerGolden(_)), retractall(playerSilver(_)),retractall(difficulty(_,_)),
 mainMenu.
 
 
@@ -73,8 +73,15 @@ takeTurn(silverPlayer, goldenPlayer):-
 playerSilver(human), doPlayerMovement(silverPlayer), printBoard, ((\+captured,doPlayerMovement(silverPlayer));captured),!.
 
 takeTurn(silverPlayer, goldenPlayer):-
-playerSilver(bot), randomPlay(silverPlayer, Pred1), Pred =.. Pred1, Pred, (captured;(\+captured,randomMove(silverPlayer, Pred2), PredD =.. Pred2, PredD)), printBoard, !.
+playerSilver(bot), difficulty(silverPlayer, random), randomPlay(silverPlayer, Pred1), Pred =.. Pred1, Pred, (captured;(\+captured,randomMove(silverPlayer, Pred2), PredD =.. Pred2, PredD)), printBoard, !.
 
+takeTurn(silverPlayer, goldenPlayer):-playerSilver(bot), difficulty(silverPlayer, greedy),
+( ( blockFlagship(X,Y,Xf,Yf), doPlay(X,Y,Xf,Yf,silverPlayer));
+	(validCapture(X,Y,Xf,Yf, silverPlayer), doPlay(X,Y,Xf,Yf,silverPlayer));
+	(randomMove(silverPlayer, Pred1), Pred =.. Pred1, Pred)),!,
+(  captured;
+	 (\+captured,  blockFlagship(X,Y,Xf,Yf), doPlay(X,Y,Xf,Yf,silverPlayer));
+	 (randomMove(silverPlayer, Pred1), Pred =.. Pred1, Pred)).
 
 doPlayerMovement(Player):-
 	repeat,write(Player), write(' chooses a piece to move:'), nl,
