@@ -105,5 +105,5 @@ validateCoordinates(Board, X, Y, silverPlayer):-
 	
 	
 takeTurn(Player):-
-	write("Choose the piece you want to move: "), nl,
+	write('Choose the piece you want to move: '), nl,
 	getCoordinates(X, Y, Board),
