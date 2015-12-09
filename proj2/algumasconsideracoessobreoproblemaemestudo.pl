@@ -79,8 +79,9 @@ labelAll([],_).
 labelAll(Sol, Cost):-
 	labelAll(Sol, Cost, []).
 
-labelAll([], Cost, Flat):- labeling(maximize(Cost), Flat).
+labelAll([], Cost, Flat):-write('gona label'),nl, maximize(labeling([], Flat), Cost).
 labelAll([Indice-[Dia1,Dia2,Dia3,Dia4,Dia5]|Tail], Cost, Flat):-
+	write('labeling'),nl,
 	append(Flat, Dia1, Flat1),
 	append(Flat1, Dia2, Flat2),
 	append(Flat2, Dia3, Flat3),
@@ -120,12 +121,12 @@ escola_de_linguas(Professores, Candidaturas, Linguas, Lucro, Solucao):-
 	initialize_solution(Solucao, 0, NProfessores, Professores),
 	restrict_teacher_hours(Solucao, Professores),
 	make_profit(Solucao, Linguas, Professores, Candidaturas, Lucro),
-	write(Lucro),
-	labelAll(Solucao, Lucro).
+	write(Lucro).
+	%labelAll(Solucao, Lucro).
 
 teste(Solucao, Lucro):-
-%escola_de_linguas([[0, [0-19, 1-19, 2-10],[0,1,2,3,4,5,6]], [1, [4-25],[0,1,2]]], [0-15, 1-10, 2-3, 3-10,4-1], [0-1,1-1,2-2,3-3,4-4], Lucro, Solucao).
-escola_de_linguas([[0, [0-10],[0,1]]], [0-10], [0-20], Lucro, Solucao).
+%escola_de_linguas([[0, [0-19, 1-19, 2-10,3-4,4-5],[0,1,2,3,4,5,6]], [1, [4-25],[0,1,2]]], [0-15, 1-10, 2-3, 3-10,4-1], [0-1,1-1,2-2,3-3,4-4], Lucro, Solucao).
+escola_de_linguas([[0, [0-10,1-10],[0,1]], [1, [0-5],[0,1]],[2, [0-5],[0,1]]], [0-10,1-10], [0-20,1-40], Lucro, Solucao).
 
 
 falha(N):-N in 0..10.
