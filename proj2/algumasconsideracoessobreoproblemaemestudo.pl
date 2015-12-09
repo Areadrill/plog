@@ -18,13 +18,13 @@
 clearScreen:-write('\e[2J').
 
 
-professoresQueDaoLingua(Lingua, [], []).
+professoresQueDaoLingua(_, [], []).
 professoresQueDaoLingua(Lingua,  [ [Prof, Linguas,_] | OutrosProfs], Lista):-
 	member(Lingua-_, Linguas),
 	professoresQueDaoLingua(Lingua, OutrosProfs, Lista2),
 	append([Prof], Lista2, Lista).
 
-professoresQueDaoLingua(Lingua,  [ [Prof, Linguas,_] | OutrosProfs], Lista):-
+professoresQueDaoLingua(Lingua,  [ [_, _,_] | OutrosProfs], Lista):-
 	professoresQueDaoLingua(Lingua, OutrosProfs, Lista).
 
 
@@ -55,7 +55,7 @@ initialize_solution([H|T], Lingua, NProfessores, Professores):-
 	initialize_solution(T, Lingua1, NProfessores, Professores).
 
 forceEmpty([]).
-forceEmpty([Dia-Horas-Prof|T]):-
+forceEmpty([_-Horas-Prof|T]):-
 	Horas in {0},
 	Prof in {-1},
 	forceEmpty(T).
@@ -66,25 +66,23 @@ excludeEmpty([Lingua-Horarios|Solucoes], Candidaturas):-
 	forceEmpty(Horarios),
 	excludeEmpty(Solucoes, Candidaturas).
 
-	excludeEmpty([Lingua-Horarios|Solucoes], Candidaturas):-
+	excludeEmpty([_-_|Solucoes], Candidaturas):-
 		excludeEmpty(Solucoes, Candidaturas).
 
 
 % [ 0-[ [0, 2, 4], [1, 3, 5] ], 1-[[0,4,5], [1,3,5],[2,6,6] ]  ]
 
-testeExclude:-
-	excludeEmpty([0-[]|T], [0-0]).
-labelAll([]).
-labelAll([H|T]):-
+labelAll([],_).
+labelAll([H|T], Cost):-
 	H = _-[Dia1,Dia2,Dia3,Dia4,Dia5],
 	labeling([], Dia1),
 	labeling([], Dia2),
 	labeling([], Dia3),
 	labeling([], Dia4),
-	labeling([], Dia5),
+	labeling([maximize(Cost)], Dia5),
 	labelAll(T).
 
-restrict_teacher_hours(Solucao, []).
+restrict_teacher_hours(_, []).
 restrict_teacher_hours(Solucao, [Professor|T]):-
 	Professor=[Indice,_,_],
 	restrict_teacher(Solucao, Indice, 0),
@@ -93,14 +91,14 @@ restrict_teacher_hours(Solucao, [Professor|T]):-
 %
 restrict_teacher([], _, Acum):- Acum #< 15, write(Acum).
 restrict_teacher([H|T], Indice, Acum):-
-	H = IndiceL-Dias,
+	H = _-Dias,
 	teacher_times(Dias, Indice, Time),
 	Acum1 #= Time+Acum,
 	restrict_teacher(T, Indice, Acum1).
 
 
-teacher_times([], Indice, 0).
-teacher_times([[IndiceDia, Horas, ProfessorResponsavel]|Dias], Indice, Time):-
+teacher_times([], _, 0).
+teacher_times([[_, Horas, ProfessorResponsavel]|Dias], Indice, Time):-
 	ProfessorResponsavel #= Indice #<=> B,
 	TempoQueOProfDaEstaAula #= B*Horas,
 	teacher_times(Dias, Indice, TempoRestante),
@@ -111,45 +109,47 @@ teacher_times([[IndiceDia, Horas, ProfessorResponsavel]|Dias], Indice, Time):-
 
 escola_de_linguas(Professores, Candidaturas, Linguas, Lucro, Solucao):-
 	length(Professores, NProfessores),
-	length(Candidaturas, NCandid),
 	length(Linguas, NLinguas),
 	length(Solucao, NLinguas),
 	initialize_solution(Solucao, 0, NProfessores, Professores),
 	restrict_teacher_hours(Solucao, Professores),
-	labelAll(Solucao).
+	make_profit(Solucao, Linguas, Professores, Candidaturas, Lucro),
+	write(Lucro),
+	labelAll(Solucao, Lucro).
 
-teste(Solucao):-
+teste(Solucao, Lucro):-
 %	escola_de_linguas([[0, [0-19, 1-19, 2-10],[0,1,2,3,4,5,6]], [1, [4-25],[0,1,2]]], [0-15, 1-10, 2-3, 3-10,4-1], [0-1,1-1,2-2,3-3,4-4], _, Solucao).
-	escola_de_linguas([[0, [0-10],[0,1]]], [0-10], [0-20], _, Solucao).
+	escola_de_linguas([[0, [0-10],[0,1]]], [0-10], [0-20], Lucro, Solucao).
 
-testinho(P,0,0).
+testinho(_,0,0).
 testinho(P, N, Value):-
 	N1 is N-1,
 	testinho(P, N1, Value1),
 	Value #= P+Value1.
 
-make_profit([], _, _, 0).
+make_profit([], _, _,_, 0).
 make_profit([Solucao|Solucoes], Linguas, Professores, Candidaturas, Lucro):-
 	make_profit_language(Solucao, Linguas, Professores, Candidaturas, LucroLingua),
-	make_profit(Solucoes, Linugas, Professores, Candidaturas, LucroResto),
-	Lucro is LucroResto+LucroLingua.
+	make_profit(Solucoes, Linguas, Professores, Candidaturas, LucroResto),
+	Lucro #= LucroResto+LucroLingua.
 
 %Lingua = Indice-[[0, 1,1],[1,2,3],[3,4,5]|...]
 make_profit_language([], _,_,0).
-make_profit_language([Lingua|OutrasLinguas], Linguas, Professores, Candidaturas, LucroLingua):-
+make_profit_language(Lingua, Linguas, Professores, Candidaturas, LucroLingua):-
 	Lingua = IndiceL-Dias,
-	make_profit_day(Dias, Linguas, Professores, Candidaturas, IndiceL, LucroDia),
-	LucroLingua is LucroDia.
-
+	make_profit_day(Dias, Linguas, Professores, Candidaturas, IndiceL, LucroLingua).
+make_profit_day([],_,_,_,_,0).
 make_profit_day([Dia|OutrosDias], Linguas, Professores, Candidaturas, IndiceL, LucroDia):-
-	Dia = [IndiceDia, Horas, Professor],
+	Dia = [_, Horas, Professor],
 	member([Professor, LinguasProfessor, _], Professores),
 	member(IndiceL-Remuneracao, LinguasProfessor),
-	Prejuizo is Remunaracao * Horas,
+	Prejuizo #= Remuneracao * Horas,
 	member(IndiceL-Preco, Linguas),
 	member(IndiceL-NumeroCandidatos, Candidaturas),
-	Lucro is Preco*Candidaturas*Horas,
-	LucroDia is Lucro-Prejuizo.
+	Lucro #= Preco*NumeroCandidatos*Horas,
+	LucroDiaAtual #= (Lucro-Prejuizo),
+	make_profit_day(OutrosDias, Linguas, Professores, Candidaturas, IndiceL, LucroRest),
+	LucroDia #= LucroRest + LucroDiaAtual.
 
 
 
