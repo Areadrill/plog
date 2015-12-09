@@ -1,4 +1,7 @@
 :-use_module(library(clpfd)).
+:-use_module(library(aggregate)).
+
+
 
 %entradas
 	% professor - (indiceP-[Lista de linguas-rendimentoporhora|_]-[Lista de dias|_])
@@ -73,14 +76,17 @@ excludeEmpty([Lingua-Horarios|Solucoes], Candidaturas):-
 % [ 0-[ [0, 2, 4], [1, 3, 5] ], 1-[[0,4,5], [1,3,5],[2,6,6] ]  ]
 
 labelAll([],_).
-labelAll([H|T], Cost):-
-	H = _-[Dia1,Dia2,Dia3,Dia4,Dia5],
-	labeling([], Dia1),
-	labeling([], Dia2),
-	labeling([], Dia3),
-	labeling([], Dia4),
-	labeling([maximize(Cost)], Dia5),
-	labelAll(T).
+labelAll(Sol, Cost):-
+	labelAll(Sol, Cost, []).
+
+labelAll([], Cost, Flat):- labeling(maximize(Cost), Flat).
+labelAll([Indice-[Dia1,Dia2,Dia3,Dia4,Dia5]|Tail], Cost, Flat):-
+	append(Flat, Dia1, Flat1),
+	append(Flat1, Dia2, Flat2),
+	append(Flat2, Dia3, Flat3),
+	append(Flat3, Dia4, Flat4),
+	append(Flat4, Dia5, Flat5),
+	labelAll(Tail, Cost, Flat5).
 
 restrict_teacher_hours(_, []).
 restrict_teacher_hours(Solucao, [Professor|T]):-
@@ -118,8 +124,12 @@ escola_de_linguas(Professores, Candidaturas, Linguas, Lucro, Solucao):-
 	labelAll(Solucao, Lucro).
 
 teste(Solucao, Lucro):-
-%	escola_de_linguas([[0, [0-19, 1-19, 2-10],[0,1,2,3,4,5,6]], [1, [4-25],[0,1,2]]], [0-15, 1-10, 2-3, 3-10,4-1], [0-1,1-1,2-2,3-3,4-4], _, Solucao).
-	escola_de_linguas([[0, [0-10],[0,1]]], [0-10], [0-20], Lucro, Solucao).
+%escola_de_linguas([[0, [0-19, 1-19, 2-10],[0,1,2,3,4,5,6]], [1, [4-25],[0,1,2]]], [0-15, 1-10, 2-3, 3-10,4-1], [0-1,1-1,2-2,3-3,4-4], Lucro, Solucao).
+escola_de_linguas([[0, [0-10],[0,1]]], [0-10], [0-20], Lucro, Solucao).
+
+
+falha(N):-N in 0..10.
+falha(N).
 
 testinho(_,0,0).
 testinho(P, N, Value):-
@@ -150,9 +160,6 @@ make_profit_day([Dia|OutrosDias], Linguas, Professores, Candidaturas, IndiceL, L
 	LucroDiaAtual #= (Lucro-Prejuizo),
 	make_profit_day(OutrosDias, Linguas, Professores, Candidaturas, IndiceL, LucroRest),
 	LucroDia #= LucroRest + LucroDiaAtual.
-
-
-
 
 
 %   0-[[0,_662339,_662259],[1,_662647,_662567],[2,_662955,_662875],[3,_663263,_663183],[4,_663571,_663491]]
