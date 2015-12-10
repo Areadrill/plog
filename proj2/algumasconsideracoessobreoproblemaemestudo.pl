@@ -1,5 +1,6 @@
 :-use_module(library(clpfd)).
 :-use_module(library(aggregate)).
+:-use_module(library(lists)).
 
 
 
@@ -91,48 +92,43 @@ labelAll([_-[Dia1,Dia2,Dia3,Dia4,Dia5]|Tail], Cost, Flat):-
 
 restrict_teacher_hours(_, []).
 restrict_teacher_hours(Solucao, [Professor|T]):-
-	Professor=[Indice,_,_],
-	restrict_teacher(Solucao, Indice, 0),
-	restrict_teacher_hours(Solucao, T).
-
-%
-restrict_teacher([], _, Acum):- Acum #< 15.
-restrict_teacher([H|T], Indice, Acum):-
-	H = _-Dias,
-	teacher_times(Dias, Indice, Time),
-	Acum1 #= Time+Acum,
-	restrict_teacher(T, Indice, Acum1).
-
-
-teacher_times([], _, 0).
-teacher_times([[_, Horas, ProfessorResponsavel]|Dias], Indice, Time):-
-	ProfessorResponsavel #= Indice #<=> B,
-	TempoQueOProfDaEstaAula #= B*Horas,
-	teacher_times(Dias, Indice, TempoRestante),
-	Time #= TempoQueOProfDaEstaAula+TempoRestante.
-
-restrict_course_times([]).
-restrict_course_times([_-[[_,H1,_],[_,H2,_],[_,H3,_],[_,H4,_],[_,H5,_]]|T]):-
-	sum([H1,H2,H3,H4,H5],#=<,4),
-	sum([H1,H2,H3,H4,H5],#>=,2),
-	restrict_course_times(T).
-	
 
 	
-
-
+generate_domain_day_list([],[],[]).
+generate_domain_day_list([[_,Hora,Prof]|Dias], H, P):-
+	generate_domain_day_list(Dias, HRest, PRest),
+	append([Hora], HRest, H),
+	append([Prof], PRest, P).
+	
+generate_variable_domain_list([],[],[]).
+generate_variable_domain_list([_-Dias|Solucoes], H, P):-
+	generate_domain_day_list(Dias, HThis, PThis),
+	generate_variable_domain_list(Solucoes, HRest, PRest),
+	append(HThis, HRest, H),
+	append(PThis, PRest, P).	
+	
 escola_de_linguas(Professores, Candidaturas, Linguas, Lucro, Solucao):-
 	length(Professores, NProfessores),
 	length(Linguas, NLinguas),
 	length(Solucao, NLinguas),
 	cria_tabela_custos(Professores, TabelaCustos, []),
 	initialize_solution(Solucao, 0, NProfessores, Professores),
-	restrict_teacher_hours(Solucao, Professores),
+	generate_variable_domain_list(Solucao, H, P),write(P), nl , write(H), nl,
+	%restrict_teacher_hours(Solucao, Professores),
 	restrict_course_times(Solucao),
 	make_profit(Solucao, Linguas, Professores, TabelaCustos, Candidaturas, Lucro),
 	write(Lucro),
 	labelAll(Solucao, Lucro).
+	
+	
+make_prof_table(Indice, Lista, NProfs):-
+	Length is NProfs+1,
+	length(Lista, Length),
+	iterate_prof_table(Lista, NProfs, Indice).
 
+iterate_prof_table(_,-1,_).
+iterate_prof_table(Lista, NProfs, NProfs):- !, nth0(NProfs, Lista, [NProfs, 1]), Next is NProfs-1, iterate_prof_table(Lista, Next, NProfs).
+iterate_prof_table(Lista, NProfs, Indice):- nth0(NProfs, Lista, [NProfs,0]), Next is NProfs-1, iterate_prof_table(Lista, Next, Indice).
 	
 	
 teste(Lucro, Solucao):-
