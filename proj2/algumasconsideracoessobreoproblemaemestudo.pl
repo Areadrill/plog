@@ -85,7 +85,7 @@ initialize_solution([H|T], Lingua, NProfessores, Professores, ProfAvailable):-
 
 
 
-labelAll(H,P,Cost):- append(H, P, List), labeling([down,leftmost,time_out(30000,_),maximize(Cost)], List).
+labelAll(H,P,Cost):- append(H, P, List), labeling([up,bisect,ff,timeout(60000,),maximize(Cost)], List).
 
 
 restrict_teacher_hours(_,_,[], _).
@@ -164,7 +164,9 @@ escola_de_linguas(Professores, Candidaturas, Linguas, Rooms, Lucro, Solucao):-
 teste:-
 	statistics(runtime, [T0| _]),
 	%escola_de_linguas([[0, [0-0,1-0,3-0,4-0,5-0,6-0],[0,1,2,3,4]], [1, [0-0,2-0],[0,1,2,3,4]],[2, [0-0,3-0,4-0,5-0,6-0],[0,1,2,3,4]],[3, [0-0,1-0,3-0,4-0,5-0,6-0],[0,1,2,3,4]]], [0-10,1-10,2-10,3-10,4-10,5-10,6-10], [0-1,1-1,2-1,3-1,4-1,5-1,6-1], 40,Lucro, Solucao),
-	escola_de_linguas([[0, [0-1, 1-1,2-1,3-0,4-0],[0,1,4,5,6]], [1, [0-1, 1-1,2-1],[0,4]], [2, [0-1, 1-1,3-1],[0,3]],[3, [0-1, 1-1,4-1,5-2,6-1],[0,2,3,4,5,6]],[4, [0-0	, 1-1,4-1],[0,1,2,3,4,5,6]]], [0-15, 1-10,2-10,3-10,4-10,5-10], [0-1,1-1,2-1,3-10,4-10,5-10], 1,_, _),
+	escola_de_linguas([[0, [0-1, 1-1,2-1,3-0,4-0],[0,1,4,5,6]], [1, [0-1, 1-1,2-1],[0,4]], [2, [0-1, 1-1,3-1],[0,3]] ],
+	[0-15, 1-10,2-10,3-10,4-10,5-10],
+	[0-1,1-1,2-1,3-10,4-10,5-10], 4,_, _),
 	statistics(runtime, [T1|_]),
 	T is T1 - T0,
 	format('O resultado foi obtido em ~3d segundos.~n', [T]).
