@@ -114,13 +114,13 @@ labelAll([_-[Dia1,Dia2,Dia3,Dia4,Dia5]|Tail], Cost, Flat):-
 restrict_teacher_hours(_,_,[], _).
 restrict_teacher_hours(Horas, ProfessoresDominio, [[Indice,_,_]|T], NProfs):-
 	make_prof_table(Indice, Table, NProfs),!,
-	restrict_teacher(Table, ProfessoresDominio, Rest),
+	append(Table, [[-1, 0]], NTable),
+	restrict_teacher(NTable, ProfessoresDominio, Rest),
 	sum_product(Horas, Rest, Sum),
 	Sum #=< 15,
 	restrict_teacher_hours(Horas, ProfessoresDominio, T, NProfs).
 
 restrict_teacher(_, [], []).
-restrict_teacher(Table, [-1|Ps],[0|T]):- restrict_teacher(Table, Ps, T).
 restrict_teacher(Table, [P|Ps], [Rest|T]):-
 	table([[P,Rest]], Table),
 	restrict_teacher(Table, Ps, T).
@@ -131,6 +131,14 @@ sum_product([X|Xs],[Y|Ys], Sum):-
 	sum_product(Xs,Ys,SumRest),
 	Sum #= X*Y + SumRest.
 
+make_prof_table(Indice, Lista, NProfs):-
+	Length is NProfs+1,
+	length(Lista, Length),
+	iterate_prof_table(Lista, NProfs, Indice).
+
+iterate_prof_table(_,-1,_).
+iterate_prof_table(Lista, NProfs, NProfs):- !, nth0(NProfs, Lista, [NProfs, 1]), Next is NProfs-1, iterate_prof_table(Lista, Next, NProfs).
+iterate_prof_table(Lista, NProfs, Indice):- nth0(NProfs, Lista, [NProfs,0]), Next is NProfs-1, iterate_prof_table(Lista, Next, Indice).
 
 
 
@@ -180,19 +188,12 @@ escola_de_linguas(Professores, Candidaturas, Linguas, Rooms, Lucro, Solucao):-
 	fd_statistics.
 
 
-make_prof_table(Indice, Lista, NProfs):-
-	Length is NProfs+1,
-	length(Lista, Length),
-	iterate_prof_table(Lista, NProfs, Indice).
 
-iterate_prof_table(_,-1,_).
-iterate_prof_table(Lista, NProfs, NProfs):- !, nth0(NProfs, Lista, [NProfs, 1]), Next is NProfs-1, iterate_prof_table(Lista, Next, NProfs).
-iterate_prof_table(Lista, NProfs, Indice):- nth0(NProfs, Lista, [NProfs,0]), Next is NProfs-1, iterate_prof_table(Lista, Next, Indice).
 
 
 teste(Lucro, Solucao):-
 	statistics(runtime, [T0| _]),
-	escola_de_linguas([[0, [0-10,1-10],[0,1]], [1, [0-5,2-1],[0,1]],[2, [0-5],[0,1]]], [0-10,1-10,2-10], [0-20,1-40,2-10], 2,Lucro, Solucao),
+	escola_de_linguas([[0, [0-10,1-10,3-10,4-20,5-20,6-20],[0,1,2,3,4]], [1, [0-5,2-1],[0,1]],[2, [0-5,3-10,4-20,5-20,6-20],[0,1]]], [0-10,1-10,2-10,3-10,4-20,5-20,6-20], [0-20,1-40,2-10,3-10,4-20,5-20,6-20], 2,Lucro, Solucao),
 	%escola_de_linguas([[0, [0-1, 1-1,2-1],[0,2,3,4,5,6]]], [0-15, 1-10,2-10,3-10], [0-1,1-1,2-1], Lucro, Solucao),
 	statistics(runtime, [T1|_]),
 	T is T1 - T0,
