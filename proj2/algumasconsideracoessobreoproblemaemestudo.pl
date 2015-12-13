@@ -32,9 +32,6 @@ professoresQueDaoLingua(Lingua,  [ [_, _,_] | OutrosProfs], Lista):-
 	professoresQueDaoLingua(Lingua, OutrosProfs, Lista).
 
 
-testeProfs(Sol):-
-	professoresQueDaoLingua(5, [[0, [0-1,1-2],_], [1, [0-2],_], [2, [3-2],_]], Sol).
-
 generate_professor_availability([], []).
 generate_professor_availability([[Indice,_,Dias]|Professors], Table):-
 	generate_professor_availability(Dias,Indice,TableThis),
@@ -156,20 +153,6 @@ escola_de_linguas(Professores, Candidaturas, Linguas, Rooms, Lucro, Solucao):-
 	printSolution(Solucao),
 	 write('O lucro total obtido e de '), write(Lucro),  nl,
 	fd_statistics.
-
-
-
-
-
-teste:-
-	statistics(runtime, [T0| _]),
-	%escola_de_linguas([[0, [0-0,1-0,3-0,4-0,5-0,6-0],[0,1,2,3,4]], [1, [0-0,2-0],[0,1,2,3,4]],[2, [0-0,3-0,4-0,5-0,6-0],[0,1,2,3,4]],[3, [0-0,1-0,3-0,4-0,5-0,6-0],[0,1,2,3,4]]], [0-10,1-10,2-10,3-10,4-10,5-10,6-10], [0-1,1-1,2-1,3-1,4-1,5-1,6-1], 40,Lucro, Solucao),
-	escola_de_linguas([[0, [0-1, 1-1,2-1,3-0,4-0],[0,1,4,5,6]], [1, [0-1, 1-1,2-1],[0,4]], [2, [0-1, 1-1,3-1],[0,3]] ],
-	[0-15, 1-10,2-10,3-10,4-10,5-10],
-	[0-1,1-1,2-1,3-10,4-10,5-10], 4,_, _),
-	statistics(runtime, [T1|_]),
-	T is T1 - T0,
-	format('O resultado foi obtido em ~3d segundos.~n', [T]).
 
 
 cria_tabela_custos([], TabelaCustos, TabelaCustos).
