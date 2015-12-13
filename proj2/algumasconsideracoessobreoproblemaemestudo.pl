@@ -54,10 +54,12 @@ generate_professor_availability([Dia|Dias],Indice, Table):-
 initialize_days_list([],_,_,_,_).
 initialize_days_list([H|T], N, NProfessores, FdSetDeProfs, ProfAvailable):-
 	H = [N,Hora,Prof],
-	Prof #= -1 #=> Hora #= 0,
-	table([[Prof,N]],ProfAvailable),
-	Prof in_set FdSetDeProfs ,
-	domain([Hora], 0, 4),
+	Prof #= -1 #<=> Hora #= 0,
+	findall(ProfA, member( [ProfA, N], ProfAvailable), ListaDeProfsA),
+	list_to_fdset(ListaDeProfsA, FdSetDisponivel),
+	fdset_intersection(FdSetDisponivel, FdSetDeProfs, FdSetFinal),
+	Prof in_set FdSetFinal,
+	domain([Hora], 0, 2),
 	N1 is N+1,
 	initialize_days_list(T, N1, NProfessores, FdSetDeProfs, ProfAvailable).
 
@@ -77,39 +79,15 @@ initialize_solution([H|T], Lingua, NProfessores, Professores, ProfAvailable):-
 	restrict_course_times([]).
 	restrict_course_times([_-[[_,H1,_],[_,H2,_],[_,H3,_],[_,H4,_],[_,H5,_]]|T]):-
 		sum([H1,H2,H3,H4,H5],#=<,4),
-		sum([H1,H2,H3,H4,H5],#>=,2),
+		sum([H1,H2,H3,H4,H5],#\=,1),
+		sum([H1,H2,H3,H4,H5],#>=,0),
 		restrict_course_times(T).
 
-forceEmpty([]).
-forceEmpty([_-Horas-Prof|T]):-
-	Horas in {0},
-	Prof in {-1},
-	forceEmpty(T).
 
-excludeEmpty([],_).
-excludeEmpty([Lingua-Horarios|Solucoes], Candidaturas):-
-	member(Lingua-0, Candidaturas),
-	forceEmpty(Horarios),
-	excludeEmpty(Solucoes, Candidaturas).
+% [ 0-[ [0, 2, 4], [1, 3, 5] ], 1-[[0,4,5], [1,3,5],[2,6,6] ]  ] labeling([ffc,bisect,up,maximize(Cost)], Flat).
 
-	excludeEmpty([_-_|Solucoes], Candidaturas):-
-		excludeEmpty(Solucoes, Candidaturas).
+labelAll(H,P,Cost):- append(H, P, List), labeling([all,down,maximize(Cost)], List).
 
-
-% [ 0-[ [0, 2, 4], [1, 3, 5] ], 1-[[0,4,5], [1,3,5],[2,6,6] ]  ]
-
-labelAll([],_).
-labelAll(Sol, Cost):-
-	labelAll(Sol, Cost, []).
-
-labelAll([], Cost, Flat):-write('gona label'),nl, labeling([ff,enum,down,maximize(Cost)], Flat).
-labelAll([_-[Dia1,Dia2,Dia3,Dia4,Dia5]|Tail], Cost, Flat):-
-	append(Flat, Dia1, Flat1),
-	append(Flat1, Dia2, Flat2),
-	append(Flat2, Dia3, Flat3),
-	append(Flat3, Dia4, Flat4),
-	append(Flat4, Dia5, Flat5),
-	labelAll(Tail, Cost, Flat5).
 
 restrict_teacher_hours(_,_,[], _).
 restrict_teacher_hours(Horas, ProfessoresDominio, [[Indice,_,_]|T], NProfs):-
@@ -139,11 +117,6 @@ make_prof_table(Indice, Lista, NProfs):-
 iterate_prof_table(_,-1,_).
 iterate_prof_table(Lista, NProfs, NProfs):- !, nth0(NProfs, Lista, [NProfs, 1]), Next is NProfs-1, iterate_prof_table(Lista, Next, NProfs).
 iterate_prof_table(Lista, NProfs, Indice):- nth0(NProfs, Lista, [NProfs,0]), Next is NProfs-1, iterate_prof_table(Lista, Next, Indice).
-
-
-
-
-
 
 generate_domain_day_list([],[],[]).
 generate_domain_day_list([[_,Hora,Prof]|Dias], H, P):-
@@ -184,7 +157,7 @@ escola_de_linguas(Professores, Candidaturas, Linguas, Rooms, Lucro, Solucao):-
 	make_profit(Solucao, Linguas, Professores, TabelaCustos, Candidaturas, Lucro),
 
 	write(Lucro),
-	labelAll(Solucao, Lucro),
+	labelAll(H, P, Lucro),
 	fd_statistics.
 
 
@@ -193,7 +166,7 @@ escola_de_linguas(Professores, Candidaturas, Linguas, Rooms, Lucro, Solucao):-
 
 teste(Lucro, Solucao):-
 	statistics(runtime, [T0| _]),
-	escola_de_linguas([[0, [0-10,1-10,3-10,4-20,5-20,6-20],[0,1,2,3,4]], [1, [0-5,2-1],[0,1]],[2, [0-5,3-10,4-20,5-20,6-20],[0,1]]], [0-10,1-10,2-10,3-10,4-20,5-20,6-20], [0-20,1-40,2-10,3-10,4-20,5-20,6-20], 2,Lucro, Solucao),
+	escola_de_linguas([[0, [0-10,1-10,3-10,4-20,5-20,6-20],[0,1,2,3,4]], [1, [0-5,2-1],[0,1,2,3,4]],[2, [0-5,3-10,4-20,5-20,6-20],[0,1,2,3,4]]], [0-10,1-10,2-10,3-10,4-10], [0-20,1-40,2-10,3-10,4-10], 2,Lucro, Solucao),
 	%escola_de_linguas([[0, [0-1, 1-1,2-1],[0,2,3,4,5,6]]], [0-15, 1-10,2-10,3-10], [0-1,1-1,2-1], Lucro, Solucao),
 	statistics(runtime, [T1|_]),
 	T is T1 - T0,
