@@ -1,0 +1,14 @@
+\contentsline {title}{Solving an optimization problem employing restraint programming}{2}
+\authcount {2}
+\contentsline {author}{Jo\IeC {\~a}o Cabral, Jo\IeC {\~a}o Mota}{2}
+\contentsline {section}{\numberline {1}Introduction}{2}
+\contentsline {section}{\numberline {2}Problem Description}{3}
+\contentsline {section}{\numberline {3}Approach}{3}
+\contentsline {subsection}{\numberline {3.1}Problem Modelization}{3}
+\contentsline {subsection}{\numberline {3.2}Decision Variables}{4}
+\contentsline {subsection}{\numberline {3.3}Constraints}{4}
+\contentsline {subsection}{\numberline {3.4}Evaluation Function}{5}
+\contentsline {subsection}{\numberline {3.5}Search Strategy}{6}
+\contentsline {section}{\numberline {4}Solution Presentation}{6}
+\contentsline {section}{\numberline {5}Results}{8}
+\contentsline {section}{\numberline {6}Conclusions and Future Work}{10}
