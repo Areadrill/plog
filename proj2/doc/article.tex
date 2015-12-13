@@ -9,10 +9,9 @@
 \usepackage[utf8]{inputenc}
 %
 \begin{document}
-
 \tableofcontents
 %
-\mainmatter              % start of the contributions
+%\mainmatter              % start of the contributions
 %
 \title{Solving an optimization problem employing restraint programming}
 %
@@ -43,6 +42,7 @@ an explanation of how the solution should be interpreted, a description of obtai
 \keywords{optimization, restraint programming, PROLOG}
 \end{abstract}
 %
+ISTO TA A FICAR APERTADO D PAGS, SE EXCEDER TIRA-SE OS VERBATIMS TODOS E OS PROFS PODEM IR LER AOS ANEXOS Q SE FODEM
 \section{Introduction}
 Within the context of the Logic Programming course of MIEIC, the authors of this paper were asked to solve an optimization problem in the most efficient way possible using the restraint programming capabilities of SICStus PROLOG. The optimization problem under study is that of producing a working schedule for a language school that maximizes it's (monetary) gains,  given a number of inputs of variable length, aswell as a number of restrictions of various types. The rest of the paper is structured as follows:
 
@@ -174,9 +174,46 @@ labeling([ff,enum,down,maximize(Profit)], Flat).
  NUM SEI OQ HEI-DE POR AQUI
  
  \section{Solution Presentation}
- After the labeling phase, the solution is presented in a way that isn't easily legible by users who have no knowledge of the program's implementation. To aid in the observation and interpretation of the solution, the authors created a predicate which converts it to a more understandable format.
+ After the labeling phase, the solution is presented in a way that isn't easily legible by users who have no knowledge of the program's implementation. To aid in the observation and interpretation of the solution, the authors created a predicate which converts it to a more understandable format.  Here's an example of a possible solution:
  
+ \begin{verbatim}
+ Language 0 Time Table
+ _______________
+Language 1 Time Table
+_______________
+Language 2 Time Table
+_______________
+Language 3 Time Table
+_______________
+Monday - 2 hours with professor 0
+Tuesday - 2 hours with professor 0
+
+Language 4 Time Table
+_______________
+Wednesday - 2 hours with professor 4
+Friday - 2 hours with professor 0
+
+Language 5 Time Table
+_______________
+Thursday - 2 hours with professor 3
+
+O lucro total obtido e de 994
+Resumptions: 967755
+Entailments: 124262
+Prunings: 348556
+Backtracks: 1566
+Constraints created: 749
+O resultado foi obtido em 0.140 segundos.
+ \end{verbatim}
  
+ As can be seen above, a time table is created for each language in which only the days in which the class is taught are displayed, along with the number of hours taught that day and the teacher who teaches them. This is achieved via the creation of 5 predictes that make the connection between the index of days and the actual day, coupled with predicates that format and write the information on the screen. (This code that does this can be viewed in the annex, namely in the predicate printSolution).
+ 
+ \section{Results}
+ %BOTA GRAFICOS E TAL
+ 
+ \section{Conclusions and Future Work}
+ Having implemented a solution to the problem under study, the paper's authors are able to appreciate the advantages of employing restraint programming in the solving of problems that are similar to the one studied here. Indeed, the implemented solution shows that the use of this technology allows for a relatively simple implementation of a solution, when compared to possible implementations using other technologies.
+%aspetos a melhorar???
  
 %
 % ---- Bibliography ----

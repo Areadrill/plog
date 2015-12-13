@@ -204,7 +204,7 @@ make_profit_day([Dia|OutrosDias], Linguas, Professores, TabelaCustos, Candidatur
 
 	Inscritos is min(NumeroCandidatos, 15),
 	Lucro #= Preco*Inscritos*Horas,
-s
+
 	LucroDiaAtual #= (Lucro-Prejuizo),
 	make_profit_day(OutrosDias, Linguas, Professores,TabelaCustos, Candidaturas, IndiceL, LucroRest),
 	LucroDia #= LucroRest + LucroDiaAtual.
