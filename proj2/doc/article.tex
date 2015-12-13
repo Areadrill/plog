@@ -125,7 +125,7 @@ restrict_course_times([]).
 
 There are, however, exceptions to this restriction in the authors' implementation of a solution, where a course can have 0 weekly hours taught when it doesn't have anyone to attend or teach it (effectively signifying that this course didn't open).
 
-Concerning the restriction that a teacher can teach at most 15 hours per week,
+Concerning the restriction that a teacher can teach at most 15 hours per week, a number of predicates are in place that process and convert the input into formats that make it easy to gather the variables that concern the number of hours a teacher teaches per week. It is then said that the sum of these variables cannot exceed 15 (the code concerning this can be viewed in the annex, and will not be replicated here for reasons of spatial economy).
 
 \subsection{Evaluation Function}
 Since the program has the goal of maximizing the monetary gains for the school, the evaluation function for the problem at hand is the total weekly gains of the school. The value for the total weekly gains of the school is calculated by summing the daily gains for each language, which can be calculated using the following formula:
