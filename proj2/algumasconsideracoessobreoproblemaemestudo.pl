@@ -59,7 +59,7 @@ initialize_days_list([H|T], N, NProfessores, FdSetDeProfs, ProfAvailable):-
 	list_to_fdset(ListaDeProfsA, FdSetDisponivel),
 	fdset_intersection(FdSetDisponivel, FdSetDeProfs, FdSetFinal),
 	Prof in_set FdSetFinal,
-	domain([Hora], 0, 2),
+	Hora in {0} \/{2},
 	N1 is N+1,
 	initialize_days_list(T, N1, NProfessores, FdSetDeProfs, ProfAvailable).
 
@@ -84,9 +84,8 @@ initialize_solution([H|T], Lingua, NProfessores, Professores, ProfAvailable):-
 		restrict_course_times(T).
 
 
-% [ 0-[ [0, 2, 4], [1, 3, 5] ], 1-[[0,4,5], [1,3,5],[2,6,6] ]  ] labeling([ffc,bisect,up,maximize(Cost)], Flat).
 
-labelAll(H,P,Cost):- append(H, P, List), labeling([all,down,maximize(Cost)], List).
+labelAll(H,P,Cost):- append(H, P, List), labeling([down,leftmost,time_out(30000,_),maximize(Cost)], List).
 
 
 restrict_teacher_hours(_,_,[], _).
@@ -134,7 +133,6 @@ generate_variable_domain_list([_-Dias|Solucoes], H, P):-
 custo_nulo([], 0).
 custo_nulo(TabelaCustos, NLinguas):-
 	NLinguas \= 0,
-	write(NLinguas),
 	N is NLinguas-1,
 	custo_nulo(TabelaCustosR, N),
 	append([[-1,N,0]], TabelaCustosR, TabelaCustos).
@@ -145,9 +143,8 @@ escola_de_linguas(Professores, Candidaturas, Linguas, Rooms, Lucro, Solucao):-
 	length(Solucao, NLinguas),
 	generate_professor_availability(Professores, ProfAvailable),
 	cria_tabela_custos(Professores, TabelaCustosReais, []),
-	write(NLinguas), nl, nl,
 	custo_nulo(CustoNulo, NLinguas),
-	append(CustoNulo, TabelaCustosReais, TabelaCustos),write(TabelaCustos),
+	append(CustoNulo, TabelaCustosReais, TabelaCustos),
 	initialize_solution(Solucao, 0, NProfessores, Professores,ProfAvailable),
 	generate_days_prof_table(Solucao, DayProf),
 	restrict_rooms(DayProf,Rooms, NLinguas),
@@ -155,22 +152,22 @@ escola_de_linguas(Professores, Candidaturas, Linguas, Rooms, Lucro, Solucao):-
 	restrict_teacher_hours(H, P, Professores, NProfessores),
 	restrict_course_times(Solucao),
 	make_profit(Solucao, Linguas, Professores, TabelaCustos, Candidaturas, Lucro),
-
-	write(Lucro),
 	labelAll(H, P, Lucro),
+	printSolution(Solucao),
+	 write('O lucro total obtido e de '), write(Lucro),  nl,
 	fd_statistics.
 
 
 
 
 
-teste(Lucro, Solucao):-
+teste:-
 	statistics(runtime, [T0| _]),
-	escola_de_linguas([[0, [0-10,1-10,3-10,4-20,5-20,6-20],[0,1,2,3,4]], [1, [0-5,2-1],[0,1,2,3,4]],[2, [0-5,3-10,4-20,5-20,6-20],[0,1,2,3,4]]], [0-10,1-10,2-10,3-10,4-10], [0-20,1-40,2-10,3-10,4-10], 2,Lucro, Solucao),
-	%escola_de_linguas([[0, [0-1, 1-1,2-1],[0,2,3,4,5,6]]], [0-15, 1-10,2-10,3-10], [0-1,1-1,2-1], Lucro, Solucao),
+	%escola_de_linguas([[0, [0-0,1-0,3-0,4-0,5-0,6-0],[0,1,2,3,4]], [1, [0-0,2-0],[0,1,2,3,4]],[2, [0-0,3-0,4-0,5-0,6-0],[0,1,2,3,4]],[3, [0-0,1-0,3-0,4-0,5-0,6-0],[0,1,2,3,4]]], [0-10,1-10,2-10,3-10,4-10,5-10,6-10], [0-1,1-1,2-1,3-1,4-1,5-1,6-1], 40,Lucro, Solucao),
+	escola_de_linguas([[0, [0-1, 1-1,2-1,3-0,4-0],[0,1,4,5,6]], [1, [0-1, 1-1,2-1],[0,4]], [2, [0-1, 1-1,3-1],[0,3]],[3, [0-1, 1-1,4-1,5-2,6-1],[0,2,3,4,5,6]],[4, [0-0	, 1-1,4-1],[0,1,2,3,4,5,6]]], [0-15, 1-10,2-10,3-10,4-10,5-10], [0-1,1-1,2-1,3-10,4-10,5-10], 1,_, _),
 	statistics(runtime, [T1|_]),
 	T is T1 - T0,
-	format('p/0 took ~3d sec.~n', [T]).
+	format('O resultado foi obtido em ~3d segundos.~n', [T]).
 
 
 cria_tabela_custos([], TabelaCustos, TabelaCustos).
@@ -205,8 +202,9 @@ make_profit_day([Dia|OutrosDias], Linguas, Professores, TabelaCustos, Candidatur
 	member(IndiceL-Preco, Linguas),
 	member(IndiceL-NumeroCandidatos, Candidaturas),
 
-	(NumeroCandidatos < 15, Lucro #= Preco*NumeroCandidatos*Horas);
-	(NumeroCandidatos >= 15, Lucro #= Preco*15*Horas),
+	Inscritos is min(NumeroCandidatos, 15),
+	Lucro #= Preco*Inscritos*Horas,
+s
 	LucroDiaAtual #= (Lucro-Prejuizo),
 	make_profit_day(OutrosDias, Linguas, Professores,TabelaCustos, Candidaturas, IndiceL, LucroRest),
 	LucroDia #= LucroRest + LucroDiaAtual.
@@ -226,6 +224,25 @@ restrict_rooms([Dia|Dias], Rooms, NLinguas):-
 	count(-1, Dia, #>=, AulasVazias),
 	restrict_rooms(Dias, Rooms, NLinguas).
 
+
+printSolution([]).
+printSolution([Indice-Dias|Solutions]):-
+	nl, write('Language '), write(Indice), write(' Time Table'),nl, write('_______________'),nl,
+	printLanguage(Indice, Dias),
+	printSolution(Solutions).
+
+dia(0, 'Monday').
+dia(1, 'Tuesday').
+dia(2, 'Wednesday').
+dia(3, 'Thursday').
+dia(4, 'Friday').
+
+printLanguage(_, []).
+printLanguage(_, [[_,0,-1]|Dias]):-printLanguage(Indice, Dias).
+printLanguage(Indice, [ [Dia,Horas,Prof]|Dias]):-
+	dia(Dia, DiaDaSemana),
+	write(DiaDaSemana), write(' - '), write(Horas), write(' hours with professor '), write(Prof), nl,
+	printLanguage(Indice, Dias).
 
 %   0-[[0,_662339,_662259],[1,_662647,_662567],[2,_662955,_662875],[3,_663263,_663183],[4,_663571,_663491]]
 %
