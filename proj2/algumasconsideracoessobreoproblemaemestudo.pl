@@ -205,7 +205,8 @@ make_profit_day([Dia|OutrosDias], Linguas, Professores, TabelaCustos, Candidatur
 	member(IndiceL-Preco, Linguas),
 	member(IndiceL-NumeroCandidatos, Candidaturas),
 
-	Lucro #= Preco*NumeroCandidatos*Horas,
+	(NumeroCandidatos < 15, Lucro #= Preco*NumeroCandidatos*Horas);
+	(NumeroCandidatos >= 15, Lucro #= Preco*15*Horas),
 	LucroDiaAtual #= (Lucro-Prejuizo),
 	make_profit_day(OutrosDias, Linguas, Professores,TabelaCustos, Candidaturas, IndiceL, LucroRest),
 	LucroDia #= LucroRest + LucroDiaAtual.
